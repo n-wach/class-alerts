@@ -567,10 +567,8 @@ with app.app_context():
     def get_all_users():
         return User.query.all()
 
-
     def get_all_codes():
         return FreePaymentCode.query.all()
-
 
     def current_user():
         if "uuid" in session:
@@ -627,7 +625,7 @@ def background_monitor():
         update_all(app)
 
 
-app.config["SHEDULER_API_ENABLED"] = False
+app.config["SCHEDULER_API_ENABLED"] = False
 app.config["JOBS"] = [
     {
         'id': 'monitor',
