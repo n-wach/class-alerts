@@ -94,8 +94,11 @@ class User(db.Model):
             else:
                 return "Unpaid User"
 
+    def get_friendly_name(self):
+        return "{}: {}".format(self.get_status(), self.email)
+
     def __str__(self):
-        return "<{}: {}>".format(self.get_status(), self.email)
+        return "<{}>".format(self.get_friendly_name())
 
 
 class PasswordResetRequest(db.Model):

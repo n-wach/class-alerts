@@ -589,11 +589,7 @@ with app.app_context():
     def format_date(value):
         return format_datetime(value, locale="en_US")
 
-    def username(user):
-        return str(user)[1:-1]
-
     app.jinja_env.filters["timedelta"] = time_delta
-    app.jinja_env.filters["username"] = username
     app.jinja_env.filters["date"] = format_date
     app.jinja_env.globals.update(get_random_color=get_random_color,
                                  get_all_users=get_all_users,
