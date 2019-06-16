@@ -1,0 +1,70 @@
+{% extends "utility/layout.html" %}
+{% from "utility/forms.html" import csrf_token, make_form, make_input_field, make_button %}
+{% from "utility/cards.html" import centered_card %}
+{% macro code_row(code) %}
+  <tr>
+    <td class="mdl-data-table__cell--non-numeric"><strong>
+      {{ code.get_creator()|username }}
+    </strong></td>
+    <td class="mdl-data-table__cell--non-numeric">{{ code.code }}</td>
+    {% if code.is_used %}
+      {% if code.get_user() %}
+        <td>{{ code.get_user().email }}</td>
+      {% else %}
+        <td>Deleted User</td>
+      {% endif %}
+    {% else %}
+      <td>Unused</td>
+    {% endif %}
+    <td>
+      {% if not code.is_used %}
+        <span onclick="post('{{ url_for('do_delete_code') }}', {'delete-code': '{{ code.code }}'})"
+              class="listing-action mdl-button mdl-js-button mdl-button--colored">
+          Delete
+        </span>
+      {% else %}
+        -
+      {% endif %}
+    </td>
+  </tr>
+{% endmacro %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  <div class="content">
+    {% call centered_card("Generate Free Payment Code", "free-code", "pink") %}
+      {% call make_form(url_for('do_generate_free_code'), error) %}
+        <p>This code can be used by any user to pay for their account. Capitalization does not matter. Codes should be
+          long and unpredictable.</p>
+        {{ make_input_field("text", "code", "Code", "[A-z0-9]{5,}", "Codes must be at least 5 characters (letters and numbers only)", required=True) }}
+        {{ make_button("Generate") }}
+      {% endcall %}
+    {% endcall %}
+    <div class="cards mdl-grid">
+      <div class="mdl-layout-spacer"></div>
+      <div id="view-accounts" class="mdl-card mdl-cell mdl-cell--6-col mdl-shadow--2dp mdl-cell">
+        <div class="mdl-card__title mdl-color--orange">
+          <h2 class="mdl-card__title-text">All Free Payment Codes</h2>
+        </div>
+        <table style="display: inline-block; overflow-x: auto; white-space: nowrap;"
+               class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+          <thead>
+          <tr>
+            <th class="mdl-data-table__cell--non-numeric">Created By</th>
+            <th style="width: 2000px" class="mdl-data-table__cell--non-numeric">Code</th>
+            <th>Used By</th>
+            <th>Delete</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for code in get_all_codes() %}
+            {{ code_row(code) }}
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="mdl-layout-spacer"></div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% from "email/email.html" import email_card %}
+{% call email_card(user.email, "Email Verification Code", "#ff9800") %}
+  A <a style="color: rgb(255,82,82);" href="https://classalerts.org">classalerts.org</a> account has just been created
+  with the email <strong>{{ user.email }}</strong>.
+  <br>
+  <br>
+  If this was you, please open the verification link:
+  <a style="color: rgb(255,82,82);" href="{{ url_for("do_verify", code=user.verify_code, _external=True) }}">
+    {{ url_for("do_verify", code=user.verify_code, _external=True) }}
+  </a>.
+  <br>
+  <br>
+  If not, don't worry.  We won't be sending you any more mail.
+{% endcall %}

@@ -1,0 +1,14 @@
+{% extends "utility/layout.html" %}
+{% from "utility/forms.html" import make_form, make_input_field, make_button %}
+{% from "utility/cards.html" import centered_card %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call centered_card("Verify Email", "verify", "orange") %}
+    <p>An email was sent to <strong>{{ user.email }}</strong> with a verification link.</p>
+    <p>Please check your email and follow the instructions.</p>
+  {% endcall %}
+{% endblock %}
+
+

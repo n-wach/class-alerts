@@ -1,0 +1,128 @@
+{% macro email_card(email_to, title, title_color="#009688") -%}
+  <html lang="en-US">
+  <body style="margin: 0;
+            padding: 0;
+            background-color: whitesmoke;
+            font-family: 'Roboto', 'Helvetica', sans-serif;">
+  <div style="width:100%;
+  display: flex;
+  flex-flow: row wrap;
+  align-wrap: stretch">
+    <div style="flex-grow: 1"></div>
+    <div style="
+      margin-top: 20px;
+      box-sizing: border-box;
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      font-size: 16px;
+      font-weight: 400;
+      min-height: 200px;
+      overflow: hidden;
+      z-index: 1;
+      position: relative;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);">
+      <div style="background-color: {{ title_color }};
+              align-items: center;
+              display: flex;
+              justify-content: stretch;
+              line-height: normal;
+              padding: 16px;
+              perspective-origin: 165px 56px;
+              transform-origin: 165px 56px;
+              box-sizing: border-box;">
+        <h2 style="
+          color: white;
+          font-size: 24px;
+          font-weight: 400;
+          align-self: flex-end;
+          display: flex;
+          line-height: normal;
+          margin: 0;">
+          {{ title }}
+        </h2>
+      </div>
+      <div style="color: rgba(0,0,0,.54);
+          font-size: 1rem;
+          line-height: 18px;
+          overflow: hidden;
+          padding: 16px;
+          width: 90%;">
+        {{ caller() }}
+      </div>
+    </div>
+    <div style="flex-grow: 1"></div>
+  </div>
+  <div style="text-align: center; margin-top: 50px; width: 100%; color: lightgray">
+    <div style="display: inline">
+      This email was sent to {{ email_to }} by classalerts.org. <a style="color: rgb(255,82,82);"
+                                                                   href="https://classalerts.org">Unsubscribe</a> by
+      deleting your account.
+      <strong>&copy 2019 Class Alerts LLC</strong>
+    </div>
+
+  </div>
+  </body>
+  </html>
+{%- endmacro %}
+
+{% macro email_card(email_to, title, title_color="#009688") -%}
+  <html lang="en-US">
+  <body style="margin: 0;
+            padding: 0;
+            background-color: whitesmoke;
+            font-family: 'Roboto', 'Helvetica', sans-serif;">
+  <div style="width:100%;
+    text-align: center">
+    <div style="
+      display: inline-block;
+      max-width: 800px;
+      width: 100%;
+      min-height: 200px;
+      z-index: 1;
+      margin-top: 20px;
+      text-align: start;
+      font-size: 16px;
+      font-weight: 400;
+      background: #fff;
+      border-radius: 5px;
+      border-bottom: #ddd solid 2px;
+      border-right: #ddd solid 1px;
+      overflow: hidden;
+      box-sizing: border-box;">
+      <div style="
+              background-color: {{ title_color }};
+              line-height: normal;
+              padding: 16px;">
+        <h2 style="
+          color: white;
+          font-size: 24px;
+          font-weight: 400;
+          line-height: normal;
+          margin: 0;">
+          {{ title }}
+        </h2>
+      </div>
+      <div style="color: rgba(0,0,0,.54);
+          font-size: 1rem;
+          line-height: 18px;
+          overflow: hidden;
+          padding: 16px;">
+        {{ caller() }}
+      </div>
+    </div>
+  </div>
+  <div style="text-align: center; margin-top: 50px; width: 100%; color: lightgray">
+    <div style="display: inline">
+      This email was sent to {{ email_to }} by classalerts.org. Please email info@m.classalerts.org to unsubscribe, or delete your account.
+      <br>
+      <strong>&copy; 2019 Class Alerts LLC</strong> | 5340 Queen Ann Ln, Santa Barbara, CA, 93111
+    </div>
+
+  </div>
+  </body>
+  </html>
+{%- endmacro %}

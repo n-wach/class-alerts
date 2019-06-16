@@ -1,0 +1,8 @@
+{% from "email/email.html" import email_card %}
+{% call email_card(user.email, "Account Activated", "#6a1b9a") %}
+  Your <a style="color: rgb(255,82,82);" href="https://classalerts.org">classalerts.org</a> account has been
+  successfully activated for the next {{ get_user_college(user).renewal_period }}.
+  <br>
+  <br>
+  Thank you for your purchase.
+{% endcall %}

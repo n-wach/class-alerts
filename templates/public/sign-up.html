@@ -1,0 +1,27 @@
+{% extends "utility/layout.html" %}
+{% from "utility/forms.html" import make_form, make_input_field, make_button, make_checkbox %}
+{% from "utility/cards.html" import centered_card %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call centered_card("Create an Account", "sign-up", "blue-grey") %}
+    {% call make_form(url_for('signup'), error) %}
+      {{ make_input_field("email", "email", "Email", required=True) }}
+      {{ make_input_field("password", "password", "Password", ".{6,}", "Password must be at least 6 characters", required=False) }}
+      {{ make_input_field("password", "confirm", "Confirm Password", ".{6,}", "Password must be at least 6 characters", required=True) }}
+      {{ make_input_field("text", "phone", "Phone Number (not required, can be changed later)", "[0-9]{11}", "Format: <code>14567890123</code>") }}
+      <div class="mdl-grid">
+        <div class="mdl-layout-spacer"></div>
+          {{ make_checkbox("agree", "I have read and agree to the <a href='" + url_for("terms_page") + "'>Terms of Service</a> and <a href='" + url_for("privacy_page") + "'>Privacy Policy</a>", size=12) }}
+        <div class="mdl-layout-spacer"></div>
+      </div>
+      {{ make_button("Create Account") }}
+      <div class="mdl-grid">
+        <div class="mdl-layout-spacer"></div>
+        <a class="mdl-button mdl-js-button mdl-cell mdl-cell--10-col" href="{{ url_for('signin') }}">Sign In</a>
+        <div class="mdl-layout-spacer"></div>
+      </div>
+    {% endcall %}
+  {% endcall %}
+{% endblock %}

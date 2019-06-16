@@ -1,0 +1,13 @@
+{% extends "utility/layout.html" %}
+{% from "utility/cards.html" import centered_card %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call centered_card("Privacy Policy", "privacy", "accent") %}
+
+    Privacy Policy goes here
+
+  {% endcall %}
+{% endblock %}
+

@@ -1,0 +1,16 @@
+{% extends "utility/layout.html" %}
+{% from "utility/cards.html" import centered_card %}
+{% from "utility/forms.html" import make_form, make_input_field, make_button %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call centered_card("Forgot Password", "forgot", "blue-grey") %}
+    {% call make_form(url_for("forgot"), error) %}
+      <p>Please enter your account's email address below. We will send you a link to reset your account's password.</p>
+      {{ make_input_field("email", "email", "Email", required=True) }}
+      {{ make_button("Send Password Reset Link") }}
+    {% endcall %}
+  {% endcall %}
+{% endblock %}
+

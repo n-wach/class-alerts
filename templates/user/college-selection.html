@@ -1,0 +1,62 @@
+{% extends "utility/layout.html" %}
+{% from "utility/cards.html" import centered_card %}
+{% from "utility/forms.html" import csrf_token %}
+
+{% macro college_li(college, ret=url_for("landing_page")) %}
+  {% set user = current_user() %}
+  <li class="mdl-list__item mdl-list__item--three-line">
+    <span class="mdl-list__item-primary-content">
+      <img class="mdl-list__item-avatar" src="{{ url_for('static', filename=college.icon) }}" alt="{{ college.name }}">
+      <span>{{ college.short_name }}</span>
+      <span class="mdl-list__item-text-body">
+        {{ college.name }}
+      </span>
+    </span>
+    <span class="mdl-list__item-secondary-action">
+      {% if user.college == college.short_name %}
+        <button class="listing-action mdl-button mdl-js-button mdl-button--colored">
+          <i class="material-icons">check</i>
+        </button>
+      {% else %}
+        <button onclick="post('{{ url_for('do_college_select') }}', {'college': '{{ college.short_name }}', 'ret': '{{ ret }}'})"
+                class="listing-action mdl-button mdl-js-button mdl-button--colored">
+          <i class="material-icons">chevron_right</i>
+        </button>
+      {% endif %}
+    </span>
+  </li>
+{% endmacro %}
+
+{% macro college_list(ret=url_for("landing_page")) %}
+  <ul class="mdl-list">
+    {% for college in colleges %}
+      {{ college_li(college, ret) }}
+    {% endfor %}
+    <li class="mdl-list__item mdl-list__item--three-line">
+      <span class="mdl-list__item-primary-content">
+        <i class="mdl-list__item-avatar material-icons">playlist_add</i>
+        <span>Missing Your College?</span>
+        <span class="mdl-list__item-text-body">
+          We're always looking to add support for more colleges. Request your college.
+        </span>
+      </span>
+      <span class="mdl-list__item-secondary-action">
+        <button onclick="visit('{{ url_for('college_request_page') }}')"
+                class="listing-action mdl-button mdl-js-button mdl-button--colored">
+          <i class="material-icons">email</i>
+        </button>
+      </span>
+    </li>
+  </ul>
+{% endmacro %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call centered_card("Select Your College", "college", "orange") %}
+    {{ csrf_token() }}
+    {{ college_list() }}
+  {% endcall %}
+{% endblock %}
+  

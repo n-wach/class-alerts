@@ -1,0 +1,71 @@
+{% macro make_input_field(type, internal_name, label, pattern=None, error_label=None, value="", required=False, tooltip=None) -%}
+  <div class="mdl-grid">
+    <div class="mdl-layout-spacer"></div>
+    <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--8-col mdl-textfield--floating-label">
+      {% if type == "multiline" %}
+        <textarea class="mdl-textfield__input" type="text" rows="5"
+                  name="{{ internal_name }}" id="{{ internal_name }}"
+                {% if required %} required {% endif %}>{{ request.form.get(internal_name, value) }}</textarea>
+        <label class="mdl-textfield__label" for="{{ internal_name }}">{{ label|safe }}</label>
+      {% else %}
+        {% if pattern != None %}
+          <input class="mdl-textfield__input" pattern="{{ pattern }}" type="{{ type }}" name="{{ internal_name }}"
+                 value="{{ request.form.get(internal_name, value) }}" id="{{ internal_name }}" {% if required %} required {% endif %}>
+          <label class="mdl-textfield__label" for="{{ internal_name }}">{{ label|safe }}</label>
+          <span class="mdl-textfield__error">{{ error_label|safe }}</span>
+        {% else %}
+          <input class="mdl-textfield__input" type="{{ type }}" name="{{ internal_name }}"
+                 value="{{ request.form.get(internal_name, value) }}" id="{{ internal_name }}" {% if required %} required {% endif %}>
+          <label class="mdl-textfield__label" for="{{ internal_name }}">{{ label|safe }}</label>
+        {% endif %}
+      {% endif %}
+      {% if tooltip %}
+        <div class="mdl-tooltip" data-mdl-for="{{ internal_name }}">
+          {{ tooltip }}
+        </div>
+      {% endif %}
+    </div>
+    <div class="mdl-layout-spacer"></div>
+  </div>
+{%- endmacro %}
+{% macro make_checkbox(internal_name, label, checked=False, disabled=False, tooltip=None, size=3) %}
+  <div class="mdl-layout-spacer"></div>
+  <label class="mdl-cell--{{ size }}-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" id="{{ internal_name }}_label" for="{{ internal_name }}">
+    <input type="checkbox" id="{{ internal_name }}" name="{{ internal_name }}" class="mdl-checkbox__input"
+      {% if checked %} checked {% endif %}
+      {% if disabled %} disabled {% endif %}>
+    <span class="mdl-checkbox__label">{{ label|safe }}</span>
+  </label>
+  {% if tooltip %}
+    <div class="mdl-tooltip" data-mdl-for="{{ internal_name }}_label">
+      {{ tooltip }}
+    </div>
+  {% endif %}
+  <div class="mdl-layout-spacer"></div>
+{% endmacro %}
+{% macro make_button(value, tooltip=None) %}
+  <div class="mdl-grid">
+    <div class="mdl-layout-spacer"></div>
+    <input type="submit"
+           class="mdl-cell mdl-cell--10-col mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+           value="{{ value }}" name="action">
+    {% if tooltip %}
+      <div class="mdl-tooltip" data-mdl-for="{{ internal_name }}">
+        {{ tooltip }}
+      </div>
+    {% endif %}
+    <div class="mdl-layout-spacer"></div>
+  </div>
+{% endmacro %}
+{% macro make_form(url, error=None) -%}
+  <form action="{{ url }}" method="POST">
+    {{ csrf_token() }}
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+    {{ caller() }}
+  </form>
+{% endmacro %}
+{% macro csrf_token() -%}
+  <input id="csrf_token" type="hidden" name="csrf_token" value="{{ get_new_csrf_token() }}">
+{%- endmacro %}

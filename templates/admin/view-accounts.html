@@ -1,0 +1,81 @@
+{% extends "utility/layout.html" %}
+{% from "utility/forms.html" import csrf_token, make_button %}
+{% macro user_row(u) %}
+
+  <tr>
+    <td class="mdl-data-table__cell--non-numeric">{{ u.get_status() }}</td>
+    <td class="mdl-data-table__cell--non-numeric"><strong>
+      {{ u.email }}
+    </strong></td>
+    <td class="mdl-data-table__cell--non-numeric">{{ u.college }}</td>
+    <td>
+      {% if u.get_requests()|length %}
+        {% for r in u.get_requests() %}
+          {{ r.display_name }}
+        {% endfor %}
+      {% else %}
+        No Classes
+      {% endif %}
+    </td>
+    <td>{{ u.phone }}</td>
+    <td>
+      {% if u.role > user.role %}
+        {% if u.is_paid %}
+          <span onclick="post('{{ url_for('set_paid') }}', {'target-uuid': '{{ u.uuid }}', 'is-paid': false})"
+                class="listing-action mdl-button mdl-js-button mdl-button--colored">
+            Disable
+          </span>
+        {% else %}
+          <span onclick="post('{{ url_for('set_paid') }}', {'target-uuid': '{{ u.uuid }}', 'is-paid': true})"
+                class="listing-action mdl-button mdl-js-button mdl-button--colored">
+            Enable
+          </span>
+        {% endif %}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+    <td>
+      <span onclick="post('{{ url_for('delete_uuid') }}', {'delete-uuid': '{{ u.uuid }}'})"
+            class="listing-action mdl-button mdl-js-button mdl-button--colored">
+        Terminate
+      </span>
+    </td>
+  </tr>
+{% endmacro %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {{ csrf_token() }}
+  <div class="content">
+    <div class="cards mdl-grid">
+      <div class="mdl-layout-spacer"></div>
+      <div id="view-accounts" class="mdl-card mdl-cell mdl-cell--11-col mdl-shadow--2dp mdl-cell">
+        <div class="mdl-card__title mdl-color--orange">
+          <h2 class="mdl-card__title-text">All Accounts</h2>
+        </div>
+        <table style="display: inline-block; overflow-x: auto; white-space: nowrap;"
+               class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+          <thead>
+          <tr>
+            <th class="mdl-data-table__cell--non-numeric">Status</th>
+            <th class="mdl-data-table__cell--non-numeric">User</th>
+            <th class="mdl-data-table__cell--non-numeric">College</th>
+            <th style="width: 2000px">Classes</th>
+            <th>Phone</th>
+            <th>Disable</th>
+            <th>Terminate</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for user in get_all_users() %}
+            {{ user_row(user) }}
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="mdl-layout-spacer"></div>
+    </div>
+  </div>
+{% endblock %}

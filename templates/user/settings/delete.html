@@ -1,0 +1,21 @@
+{% extends "utility/layout.html" %}
+{% from "utility/forms.html" import make_form, make_input_field, make_button %}
+{% from "user/settings/settings.html" import settings_card %}
+{% from "utility/forms.html" import csrf_token %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call settings_card("Delete Your Account") %}
+    {{ csrf_token() }}
+    {% call make_form(url_for("settings", prop="delete"), error) %}
+      <span class="error">Warning! There is no confirmation after you click this button.
+        One click and your account and all relevant information will be permanently deleted from our system. You must
+        contact us for a new one.</span>
+      {{ make_button("Permanently Delete My Account") }}
+    {% endcall %}
+  {% endcall %}
+{% endblock %}
+
+

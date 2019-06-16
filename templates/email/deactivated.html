@@ -1,0 +1,8 @@
+{% from "email/email.html" import email_card %}
+{% call email_card(user.email, "Renew Your Account", "#6a1b9a") %}
+  Your <a style="color: rgb(255,82,82);" href="https://classalerts.org">classalerts.org</a> account has been
+  deactivated.
+  <br>
+  <br>
+  Please log in to renew your account for the next {{ user.get_college().renewal_period }}.
+{% endcall %}

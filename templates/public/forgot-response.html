@@ -1,0 +1,12 @@
+{% extends "utility/layout.html" %}
+{% from "utility/cards.html" import centered_card %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call centered_card("Forgot Password", "forgot", "blue-grey") %}
+    <p>An email has been sent to <strong>{{ forgot_email }}</strong>. Please follow the instructions in the email to
+      reset your password.</p>
+  {% endcall %}
+{% endblock %}
+

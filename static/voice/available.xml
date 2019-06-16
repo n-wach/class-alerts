@@ -1,0 +1,4 @@
+<Response>
+    <Say voice="man" loop="5">Your class has an available spot!</Say>
+    <Hangup/>
+</Response>

@@ -1,0 +1,23 @@
+<div class="mdl-grid">
+  <div class="mdl-layout-spacer"></div>
+  <div class="mdl-cell mdl-cell--8-col mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
+    <select class="mdl-selectfield__select" id="term" name="term">
+      {% for term in terms %}
+      <option value="{{ term }}">{{ term_names[loop.index0] }}</option>
+      {% endfor %}
+    </select>
+    <label class="mdl-selectfield__label" for="term">Term</label>
+  </div>
+  <div class="mdl-layout-spacer"></div>
+</div>
+<div class="mdl-grid">
+  <div class="mdl-layout-spacer"></div>
+  <div class="mdl-cell mdl-cell--8-col">
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+      <input class="mdl-textfield__input" type="text" name="crn" id="crn" pattern="\d{5}">
+      <label class="mdl-textfield__label" for="crn">CRN</label>
+      <span class="mdl-textfield__error">CRN is a 5 digit number</span>
+    </div>
+  </div>
+  <div class="mdl-layout-spacer"></div>
+</div>

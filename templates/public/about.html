@@ -1,0 +1,186 @@
+{% extends "utility/layout.html" %}
+{% from "utility/cards.html" import centered_card %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  <div id="about" class="content mdl-color-text--grey-800">
+    <div class="mdl-grid">
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-cell mdl-cell--8-col">
+        <h1>Get in to your classes.</h1>
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--8-col">
+            <p>We know how important it is to get in to college classes. Everyone has
+              preferred professors and class times.
+              However, in many cases, not getting in to your classes is more than an inconvenience.
+              It could mean that you'll have to pay for another year of college.
+              Luckily, you have more opportunities to register for your class than you might expect! Almost all classes
+              have people unregister before they begin. You could take their spot!</p>
+            <div class="mdl-grid">
+              <div class="mdl-layout-spacer"></div>
+              {% if user %}
+                <button class="mdl-cell mdl-cell--4-col mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color--blue-grey"
+                        onclick="visit('{{ url_for('landing_page') }}')">View Dashboard
+                </button>
+              {% else %}
+                <button class="mdl-cell mdl-cell--4-col mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color--blue-grey"
+                        onclick="visit('{{ url_for('signup') }}')">Sign Up
+                </button>
+                <div class="mdl-layout-spacer"></div>
+                <button class="mdl-cell mdl-cell--4-col mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color--blue-grey"
+                        onclick="visit('{{ url_for('signin') }}')">Sign In
+                </button>
+              {% endif %}
+              <div class="mdl-layout-spacer"></div>
+            </div>
+          </div>
+          <div class="mdl-layout-spacer"></div>
+          <div class="mdl-card mdl-cell mdl-cell--4-col mdl-shadow--2dp">
+            <div class="mdl-card__title mdl-color--indigo">
+              <h2 class="mdl-card__title-text">MATH 220 (CRN: 23437)</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <strong>Status: </strong>Seats: 30 of 30 | Waitlist: 4 of 5<br>
+              <strong>Last Checked: </strong>{{ (time() % 5)|int }} seconds ago
+            </div>
+            <div class="mdl-card__actions mdl-card--border mdl-grid ">
+              <button id="info"
+                      class="listing-action mdl-cell mdl-cell--4-col mdl-button mdl-js-button mdl-button--colored">
+                <i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">info</i>
+              </button>
+              <button id="delete"
+                      class="listing-action mdl-cell mdl-cell--4-col mdl-button mdl-js-button mdl-button--colored">
+                <i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">delete</i>
+              </button>
+              <button id="register"
+                      class="listing-action mdl-cell mdl-cell--4-col mdl-button mdl-js-button mdl-button--colored">
+                <i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">input</i>
+              </button>
+            </div>
+            <div class="mdl-layout-spacer"></div>
+          </div>
+        </div>
+        <div class="mdl-tooltip" data-mdl-for="info">
+          Info
+        </div>
+        <div class="mdl-tooltip" data-mdl-for="delete">
+          Delete
+        </div>
+        <div class="mdl-tooltip" data-mdl-for="register">
+          Register
+        </div>
+        <h2>Every 5 seconds</h2>
+        <div class="mdl-grid">
+          <p class="mdl-cell mdl-cell--12-col">
+            When you add a class on Class Alerts, our servers will start checking the registration status of your class.
+            As soon as there's an opening, we'll let you know.
+            <br><br>
+            Most class checkers check your classes every 5 minutes. Class Alerts checks your classes every 5 seconds.
+            That means that if a spot opens, you'll be the first to know. It'll be hard to miss our emails and text
+            messages. We continue to send messages every few minutes after a spot opens up&mdash;So don't worry if you
+            miss the first one.
+          </p>
+        </div>
+        <div id="notification-icons" class="mdl-grid">
+          <div class="mdl-layout-spacer"></div>
+          <i class="large-icon material-icons mdl-badge mdl-badge--overlap">phone</i>
+          <div class="mdl-layout-spacer"></div>
+          <i class="large-icon material-icons mdl-badge mdl-badge--overlap">chat</i>
+          <div class="mdl-layout-spacer"></div>
+          <i class="large-icon material-icons mdl-badge mdl-badge--overlap">email</i>
+          <div class="mdl-layout-spacer"></div>
+          <script>
+              let v = document.querySelectorAll("#notification-icons .material-icons");
+              let c = v.length;
+              let d = "data-badge";
+              for (let i = 0; i < c; i++) {
+                  let e = v[i];
+                  setTimeout(function () {
+                      e.setAttribute(d, 1);
+                      let j = setInterval(function () {
+                          let o = parseInt(e.getAttribute(d));
+                          if (o >= 99) {
+                              e.setAttribute(d, "99+");
+                              clearInterval(j);
+                          } else {
+                              e.setAttribute(d, o + 1);
+                          }
+                      }, 5000);
+                  }, 3000 + i * (5000 / c));
+              }
+          </script>
+        </div>
+        <h2>Register quickly</h2>
+        <div class="mdl-grid">
+          <p class="mdl-cell mdl-cell--12-col">
+            Our messages include a link straight to your college's registration page,
+            so you can register as quickly as possible. Every second counts!
+          </p>
+        </div>
+        <h2>Over {{ (colleges|length - 1) }} Colleges Supported!</h2>
+        <div class="mdl-grid">
+          <div class="mdl-layout-spacer"></div>
+          {% for college in colleges %}
+            <div class="mdl-cell mdl-cell--2-col">
+              <img class="college-icon" src="{{ url_for('static', filename=college.icon) }}" alt="{{ college.name }}"/>
+            </div>
+          {% endfor %}
+          <div class="mdl-layout-spacer"></div>
+        </div>
+        <h2>Pricing</h2>
+        <div class="mdl-grid">
+          <p class="mdl-cell--12-col">
+            Our pricing is simple: $3 per Quarter, or $4 per Semester. This lets you subscribe to notifications for up
+            to 10 classes. Pay online with PayPal!
+          </p>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-layout-spacer"></div>
+          <ul class="mdl-cell--6-col mdl-list">
+            <li class="mdl-list__item mdl-list__item--three-line">
+              <span class="mdl-list__item-primary-content">
+                <img class="mdl-list__item-avatar" src="{{ url_for('static', filename="images/calpoly.png") }}" alt="Cal Poly">
+                <span>Alex Oaten - Cal Poly</span>
+                <span class="mdl-list__item-text-body">
+                  Class Alerts made it far easier and less stressful
+                  to get into my classes.  One semester, three classes
+                  I wanted to take were full, but I was able to get
+                  into every single one thanks to Class Alerts.
+                </span>
+              </span>
+            </li>
+            <li class="mdl-list__item mdl-list__item--three-line">
+              <span class="mdl-list__item-primary-content">
+                <img class="mdl-list__item-avatar" src="{{ url_for('static', filename="images/ucla.png") }}" alt="UCLA">
+                <span>Blake Lazarine - UCLA</span>
+                <span class="mdl-list__item-text-body">
+                  I had been trying to get into some
+                  pretty popular classes.  Before classalerts.org
+                  I had to periodically check and hope I'm lucky.
+                  Now I know that I am never missing any opportunities.
+                </span>
+              </span>
+            </li>
+            <li class="mdl-list__item mdl-list__item--three-line">
+              <span class="mdl-list__item-primary-content">
+                <img class="mdl-list__item-avatar" src="{{ url_for('static', filename="images/columbia.jpg") }}" alt="Columbia University">
+                <span>Jacob Kim-Sherman - Columbia University</span>
+                <span class="mdl-list__item-text-body">
+                  Class Alerts really took the stress out
+                  of registering for classes, allowing me
+                  to get a spot in the perfect class at the
+                  perfect time in my schedule.
+                </span>
+              </span>
+            </li>
+          </ul>
+          <div class="mdl-layout-spacer"></div>
+        </div>
+        <div class="mdl-layout-spacer"></div>
+      </div>
+      <div class="mdl-layout-spacer"></div>
+    </div>
+  </div>
+{% endblock %}
+  

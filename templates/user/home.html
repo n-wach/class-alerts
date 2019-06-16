@@ -1,0 +1,71 @@
+{% extends "utility/layout.html" %}
+{% from "utility/forms.html" import csrf_token %}
+{% macro tile_icon(title, color, icon, onclick, disabled) %}
+  <div class="mdl-card mdl-cell mdl-cell--2-col mdl-cell--12-col-phone mdl-shadow--2dp mdl-cell">
+    <div class="mdl-card__title mdl-color--{{ color }}">
+      <h2 class="mdl-card__title-text">{{ title }}</h2>
+    </div>
+    <div class="mdl-card__actions mdl-card--border mdl-grid">
+      {% if disabled %}
+        <button disabled class="tall mdl-cell mdl-cell--12-col mdl-button mdl-js-button mdl-button--colored"
+                onclick="{{ onclick }}">
+          <i class="large mdl-color-text--blue-grey-400 material-icons" role="presentation">{{ icon }}</i>
+        </button>
+      {% else %}
+        <button class="tall mdl-cell mdl-cell--12-col mdl-button mdl-js-button mdl-button--colored"
+                onclick="{{ onclick }}">
+          <i class="large mdl-color-text--blue-grey-400 material-icons" role="presentation">{{ icon }}</i>
+        </button>
+      {% endif %}
+    </div>
+  </div>
+{%- endmacro %}
+{% macro tile_class(class_monitor) %}
+  <div class="mdl-card mdl-cell mdl-cell--3-col mdl-cell--12-col-phone mdl-cell--12-col-tablet mdl-shadow--2dp mdl-cell">
+    <div class="mdl-card__title {{ get_random_color() }}">
+      <h2 class="mdl-card__title-text">{{ class_monitor.class_instance.display_name }}</h2>
+    </div>
+    <div class="mdl-card__supporting-text">
+      <strong>Status: </strong>{{ class_monitor.class_instance.status_message }}<br>
+      <strong>Last Checked: </strong>{{ class_monitor.last_checked|timedelta }}
+    </div>
+    <div class="mdl-card__actions mdl-card--border mdl-grid ">
+      <button class="listing-action mdl-cell mdl-cell--6-col mdl-button mdl-js-button mdl-button--colored"
+              onclick="info('{{ class_monitor.class_instance.info_url }}')">
+        <i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">info</i>
+      </button>
+      <button class="listing-action mdl-cell mdl-cell--6-col mdl-button mdl-js-button mdl-button--colored"
+              onclick="post('{{ url_for('remove_class') }}', {uuid: '{{ class_monitor.uuid }}' })">
+        <i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">delete</i>
+      </button>
+    </div>
+  </div>
+{%- endmacro %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {{ csrf_token() }}
+  <div class="content">
+    <div class="cards mdl-grid">
+      {% for class in user.get_requests() %}
+        {{ tile_class(class.get_monitor()) }}
+      {% endfor %}
+      {% if not user.is_paid %}
+        {{ tile_icon("Activate Your Account", "purple", "attach_money", "visit('" + url_for('renew') + "')", False) }}
+      {% else %}
+        {{ tile_icon("Add a Class", "green", "add", "visit('" + url_for('add') + "')", False) }}
+      {% endif %}
+      {{ tile_icon("Account Settings", "blue-grey", "settings", "visit('" + url_for('settings_list') + "')", False) }}
+      {% if user.role <= 1 %}
+        {{ tile_icon("View Accounts", "deep-orange", "view_list", "visit('" + url_for('view_all') + "')", False) }}
+        {{ tile_icon("View Codes", "deep-orange", "view_list", "visit('" + url_for('view_codes') + "')", False) }}
+      {% endif %}
+      {% if user.role == 0 %}
+        {{ tile_icon("Message All", "deep-orange", "edit", "visit('" + url_for('message') + "')", False) }}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+

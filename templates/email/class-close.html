@@ -1,0 +1,9 @@
+{% from "email/email.html" import email_card %}
+{% call email_card(user.email, "Closed: " + class_monitor.class_instance.display_name, "#c62828") %}
+  <strong>Status: </strong>{{ class_monitor.class_instance.status_message }}
+  <br>
+  <strong>Last Checked: </strong>{{ class_monitor.last_checked|date }}
+  <br>
+  <br>
+  The class is no longer available.
+{% endcall %}

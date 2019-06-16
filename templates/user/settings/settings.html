@@ -1,0 +1,42 @@
+{% extends "utility/layout.html" %}
+
+{% macro settings_li(setting_name, setting_internal_name) %}
+  <li class="mdl-list__item mdl-button mdl-js-button setting-li"
+      onclick="visit('{{ url_for('settings', prop=setting_internal_name) }}')">
+    <span class="mdl-list__item-primary-content">
+      {{ setting_name }}
+    </span>
+    <span class="mdl-list__item-secondary-action">
+      <i class="listing-action material-icons">chevron_right</i>
+    </span>
+  </li>
+{% endmacro %}
+
+{% macro settings_card(setting_name, back=True) %}
+  {% set content = caller() %}
+  {% if back %}
+    {% call centered_card_back(setting_name, "settings", "blue-grey", back="settings_list") %}
+      {{ content }}
+    {% endcall %}
+  {% else %}
+    {% call centered_card(setting_name, "settings", "blue-grey") %}
+      {{ content }}
+    {% endcall %}
+  {% endif %}
+{% endmacro %}
+
+{% from "utility/forms.html" import make_form, make_input_field %}
+{% from "utility/cards.html" import centered_card, centered_card_back %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block body %}
+  {% call centered_card_back("Settings", "settings", "blue-grey") %}
+    {{ settings_li("Change Notification Settings", "notification") }}
+    {{ settings_li("Change College", "college") }}
+    {{ settings_li("Change Password", "password") }}
+    {{ settings_li("Delete My Account", "delete") }}
+  {% endcall %}
+{% endblock %}
+
+
