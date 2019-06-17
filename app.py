@@ -8,12 +8,12 @@ from time import time, sleep
 from babel.dates import format_timedelta, format_datetime
 from flask import Flask, session, render_template, url_for, abort, redirect, request
 from flask_apscheduler import APScheduler
+from twilio.twiml.voice_response import VoiceResponse
 
 from colleges import colleges, college_names, get_user_college, college_short_names
 from decorators import requires_signin, requires_paid, requires_verified, requires_form_field, displays_error, \
     requires_role, errors
-from Notifier import send_verification_email, prepare_templates, send_password_reset_email, send_contact_email, \
-    send_test
+from Notifier import send_verification_email, prepare_templates, send_password_reset_email, send_contact_email
 from DB import db, User, update_all, attempt_get_user, get_user, ROLE_ADMIN, ClassRequest, ROLE_MARKETER, \
     FreePaymentCode, PasswordResetRequest
 
@@ -485,11 +485,6 @@ def renew(error):
     return render_template("user/renew.html", error=error)
 
 
-@app.route("/call_me")
-def call_me():
-    send_test()
-    return "Done."
-
 @app.route("/signout")
 def signout():
     session.clear()
@@ -598,6 +593,14 @@ with app.app_context():
                                  get_user_college=get_user_college,
                                  time=time)
 
+print("Adding Voice endpoints")
+@app.route("/voice/open", methods=["GET", "POST"])
+def voice_open():
+    resp = VoiceResponse()
+    resp.say("A class you're monitoring on Class Alerts has an available spot.", loop=5)
+    resp.hangup()
+    return str(resp)
+
 
 print("Loading Notifier templates")
 prepare_templates(app)
@@ -611,8 +614,8 @@ Payments.route(app)
 
 print("Creating Database Manager")
 if not os.getcwd().endswith("Alerts"):
-    raise EnvironmentError("Working directory must be /Alerts.  SBCC.db is expected in the working directory")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.getcwd() + '/SBCC.db'
+    raise EnvironmentError("Working directory must be /Alerts.  Alerts.db is expected in the working directory")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.getcwd() + '/Alerts.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 

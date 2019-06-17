@@ -9,16 +9,16 @@ from datetime import datetime
 from flask import url_for
 from twilio.rest import Client
 
-sms_sid = os.environ.get("SMS_SID")
-sms_auth = os.environ.get("SMS_AUTH")
-sms_sender = "+18056181459"
-SEND_SMS = False
+twilio_sid = os.environ.get("TWILIO_SID")
+twilio_auth = os.environ.get("TWILIO_AUTH")
+twilio_sender = "+18056181459"
+USE_TWILIO = False
 
 email_sender = "Class Alerts <info@m.classalerts.org>"
 email_api_key = os.environ.get("EMAIL_API_KEY")
 email_url = "https://api.mailgun.net/v3/m.classalerts.org/messages"
 
-client = Client(sms_sid, sms_auth)
+client = Client(twilio_sid, twilio_auth)
 
 
 TEMPLATE_VERIFICATION = None
@@ -53,35 +53,61 @@ def prepare_templates(a):
 
 
 def send_sms(raw_phone, message):
-    if len(str(raw_phone)) != 11:
-        return None
-    if SEND_SMS:
-        client.messages.create(
-            to="+" + str(raw_phone),
-            body=message,
-            from_=sms_sender)
-        print("Message sent to " + str(raw_phone))
-    else:
-        print("Pretend a message was sent to " + str(raw_phone))
+    try:
+        if len(str(raw_phone)) != 11:
+            return None
+        if USE_TWILIO:
+            client.messages.create(
+                to="+" + str(raw_phone),
+                body=message,
+                from_=twilio_sender)
+            print("Message sent to " + str(raw_phone))
+        else:
+            print("Pretend a message was sent to " + str(raw_phone))
+    except:
+        print("Exception on SMS to '{}'".format(raw_phone))
 
 
-def send_call(raw_phone):
+def send_sms_open(user, monitor):
+    inst = monitor.class_instance
+    subj = "OPEN: " + inst.display_name
+    msg = "Status Update: {}\n" \
+          "View: {}\n" \
+          "Sign up: {}".format(inst.status_message, inst.info_url, inst.action_url)
+    send_sms(user.phone, "{}\n{}".format(subj, msg))
+
+
+def send_sms_remind(user, monitor):
+    send_sms_open(user, monitor)  # same for now
+
+
+def send_sms_close(user, monitor):
+    inst = monitor.class_instance
+    msg = "CLOSED: {}\n" \
+          "Status Update: {}\n" \
+          "View: {}\n".format(inst.display_name, inst.status_message, inst.info_url)
+    send_sms(user.phone, msg)
+
+
+def send_call(raw_phone, url):
     if len(str(raw_phone)) != 11:
         return None
-    if SEND_SMS:
+    if USE_TWILIO:
         client.calls.create(
             to="+" + str(raw_phone),
-            from_=sms_sender)
+            from_=twilio_sender,
+            url=url)
         print("Message sent to " + str(raw_phone))
     else:
         print("Pretend a call was sent to " + str(raw_phone))
 
 
-def send_test():
-    client.calls.create(
-        to="+18055709334",
-        from_=sms_sender,
-        url="http://classalerts.org/voice/available.xml")
+def send_call_open(user, monitor):
+    send_call(user.phone, "https://classalerts.org/voice/open")
+
+
+def send_call_remind(user, monitor):
+    send_call_open(user, monitor)  # same for now
 
 
 def send_email(recipient, subject, html=None, plain="Email only available in html format."):
@@ -131,6 +157,10 @@ def send_class_open_email(user, class_monitor):
                TEMPLATE_CLASS_STATUS_OPEN.render(user=user, class_monitor=class_monitor),
                "Class open!\n{}\nRegister: {}".format(class_monitor.class_instance.status_message,
                                                       class_monitor.class_instance.action_url))
+
+
+def send_class_remind_email(user, class_monitor):
+    send_class_open_email(user, class_monitor)
 
 
 def send_class_closed_email(user, class_monitor):

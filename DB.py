@@ -6,8 +6,10 @@ from datetime import datetime
 import bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
-from Notifier import send_sms, send_email, send_activation_email, send_class_closed_email, send_class_open_email, \
-    send_deactivation_email, send_password_change_email
+from Notifier import send_activation_email, send_deactivation_email, send_password_change_email, \
+    send_class_closed_email, send_class_open_email, send_class_remind_email,\
+    send_call_open, send_call_remind, \
+    send_sms_open, send_sms_remind, send_sms_close
 
 db = SQLAlchemy()
 db.session.expire_on_commit = False
@@ -72,11 +74,23 @@ class User(db.Model):
     def verify_password(self, raw_password):
         return bcrypt.checkpw(raw_password.encode(), self.bcrypt_password.encode())
 
-    def send_sms(self, msg):
-        try:
-            send_sms(self.phone, msg)
-        except:
-            print("Exception on SMS to {}@{}".format(self, self.phone))
+    def attempt_notify(self, ntype, monitor):
+        if ntype == "open":
+            send_class_open_email(self, monitor)
+            if self.available_call:
+                send_call_open(self, monitor)
+            if self.available_sms:
+                send_sms_open(self, monitor)
+        elif ntype == "remind":
+            send_class_remind_email(self, monitor)
+            if self.periodically_call:
+                send_call_remind(self, monitor)
+            if self.periodically_sms:
+                send_sms_remind(self, monitor)
+        elif ntype == "close":
+            send_class_closed_email(self, monitor)
+            if self.unavailable_sms:
+                send_sms_close(self, monitor)
 
     def get_requests(self):
         return ClassRequest.query.filter_by(requester_uuid=self.uuid).all()
@@ -228,27 +242,19 @@ class ClassRequest(db.Model):
         delay_notify = datetime.now() - self.last_notified
         monitor = self.get_monitor()
         if monitor.has_availability:
-            if delay_notify.total_seconds() > (59 * (2 ** self.notifications_sent) - 5):
-                user = self.get_requester()
+            if self.notifications_sent == 0:
                 self.notifications_sent += 1
                 self.last_notified = datetime.now()
-                inst = monitor.class_instance
-                subj = "OPEN: " + inst.display_name
-                msg = "Status Update: {}\n" \
-                      "View: {}\n" \
-                      "Sign up: {}".format(inst.status_message, inst.info_url, inst.action_url)
-                send_class_open_email(user, monitor)
-                user.send_sms("{}\n{}".format(subj, msg))
+                user = self.get_requester()
+                user.attempt_notify("open", monitor)
+            elif delay_notify.total_seconds() > (59 * (2 ** self.notifications_sent) - 5):
+                self.notifications_sent += 1
+                self.last_notified = datetime.now()
+                user = self.get_requester()
+                user.attempt_notify("remind", monitor)
         else:
             if self.notifications_sent > 0:
                 user = self.get_requester()
-                inst = monitor.class_instance
-                subj = "CLOSED: " + inst.display_name
-                msg = "Status Update: {}\n" \
-                      "View: {}\n" \
-                      "Sign up: {}".format(inst.status_message, inst.info_url, inst.action_url)
-                send_class_open_email(user, monitor)
-                user.send_sms("{}\n{}".format(subj, msg))
             self.notifications_sent = 0
 
     def get_monitor(self):
