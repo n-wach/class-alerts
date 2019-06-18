@@ -607,7 +607,6 @@ prepare_templates(app)
 
 
 print("Preparing PayPal service handlers")
-
 import Payments
 Payments.route(app)
 
