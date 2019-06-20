@@ -8,6 +8,8 @@ from time import time, sleep
 from babel.dates import format_timedelta, format_datetime
 from flask import Flask, session, render_template, url_for, abort, redirect, request
 from flask_apscheduler import APScheduler
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from twilio.twiml.voice_response import VoiceResponse
 
 from colleges import colleges, college_names, get_user_college, college_short_names
@@ -25,7 +27,7 @@ app = Flask(__name__,
 print("Configuring...")
 DEV_GEN = True
 app.secret_key = os.environ.get("SECRET_KEY")
-
+limiter = Limiter(app, key_func=get_remote_address, default_limits=["100 per hour", "10 per second"])
 
 print("Defining Constants...")
 PATTERN_UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
@@ -91,7 +93,7 @@ def college_select():
 @requires_form_field("email", if_missing="Email missing", redirect_url_for="login",
                      value_pattern=PATTERN_NOT_EMPTY)
 @requires_form_field("password", if_missing="Password missing", redirect_url_for="login",
-                     value_pattern=PATTERN_NOT_EMPTY)
+                     value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
 def do_signin():
     login_pw = request.form.get("password")
     login_email = request.form.get("email")
@@ -115,9 +117,9 @@ def signin(error):
 @app.route("/signup", methods=["POST"])
 @requires_form_field("email", if_missing="Email missing", redirect_url_for="signup", value_pattern=PATTERN_NOT_EMPTY)
 @requires_form_field("password", if_missing="Password missing", redirect_url_for="signup",
-                     value_pattern=PATTERN_NOT_EMPTY)
+                     value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
 @requires_form_field("confirm", if_missing="Password confirmation missing", redirect_url_for="signup",
-                     value_pattern=PATTERN_NOT_EMPTY)
+                     value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
 def do_signup():
     create_email = request.form.get("email")
     create_pw = request.form.get("password")
@@ -186,6 +188,7 @@ def verify(error):
 @requires_role(ROLE_ADMIN)
 @requires_form_field("message", if_missing="Missing message", redirect_url_for="message",
                      value_pattern=PATTERN_MASS_MESSAGE, if_invalid="Message too short!")
+@limiter.limit("5 per hour")
 def do_message():
     for user in User.query.all():
         user.message("Important Message!", request.form.get("message"), request.form.get("message"))
@@ -227,6 +230,7 @@ def do_generate_free_code():
 @requires_paid(paid=False)
 @requires_form_field("code", if_missing="Missing code", redirect_url_for="view_codes",
                      value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
+@limiter.limit("1 per second")
 def do_use_free_code():
     code = request.form.get("code").lower()
     fpc = FreePaymentCode.query.filter_by(code=code).first()
@@ -297,6 +301,7 @@ def add(error):
 @app.route("/add", methods=["POST"])
 @requires_signin
 @requires_paid(True)
+@limiter.limit("20 per hour")
 def do_add():
     try:
         user = get_user(session["uuid"])
@@ -326,6 +331,7 @@ def do_add():
 
 @app.route("/forgot", methods=["POST"])
 @requires_form_field("email", if_missing="Email missing", redirect_url_for="forgot_page", value_pattern=PATTERN_EMAIL)
+@limiter.limit("5 per hour")
 def forgot():
     email = request.form.get("email")
     user = User.query.filter_by(email=email).first()
@@ -352,6 +358,7 @@ def reset_password_page(error, reset_uuid):
 
 
 @app.route("/password_reset/<reset_uuid>", methods=["POST"])
+@limiter.limit("5 per hour")
 def reset_password(reset_uuid):
     prr = PasswordResetRequest.query.filter_by(uuid=reset_uuid).first()
     password = request.form.get("password", "")
@@ -493,12 +500,12 @@ def signout():
 
 @app.route("/contact", methods=["POST"])
 @requires_form_field("email", if_missing="Email missing", redirect_url_for="contact_page", value_pattern=PATTERN_EMAIL)
+@requires_form_field("subject", if_missing="Subject missing", redirect_url_for="contact_page", value_pattern=PATTERN_NOT_EMPTY)
 @requires_form_field("message", if_missing="Message missing", redirect_url_for="contact_page", value_pattern=PATTERN_NOT_EMPTY)
+@limiter.limit("5 per hour")
 def contact():
     email = request.form.get("email")
-    subject = request.form.get("subject")
-    if not subject:
-        subject = "No Subject"
+    subject = request.form.get("subject", "No Subject")
     msg = request.form.get("message")
     send_contact_email(email, subject, msg)
     return errors("Your message has been sent", "contact_page")

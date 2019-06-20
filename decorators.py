@@ -42,7 +42,7 @@ def requires_role(role):
     return decorator
 
 
-def requires_form_field(name, if_missing, redirect_url_for=None, value_pattern=None, if_invalid=None):
+def requires_form_field(name, if_missing, redirect_url_for=None, value_pattern=None, if_invalid=None, repopulate=True):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
@@ -50,6 +50,10 @@ def requires_form_field(name, if_missing, redirect_url_for=None, value_pattern=N
             error_message = None
             if value is None:
                 error_message = if_missing
+            elif repopulate:
+                repopulate_form = session.get("repopulate_form", {})
+                repopulate_form[name] = value
+                session["repopulate_form"] = repopulate_form
 
             elif value_pattern is not None:
                 if not value_pattern.match(value):
