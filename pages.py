@@ -1,0 +1,129 @@
+from flask import render_template, session, redirect, url_for
+
+from db import get_user, ROLE_ADMIN, ROLE_MARKETER
+from colleges import college_short_names
+from decorators import requires_signin, displays_error, requires_verified, requires_role, requires_paid
+
+
+def route(app):
+    @app.route("/")
+    def landing_page():
+        if "uuid" not in session:
+            return render_template("public/about.html")
+
+        user = get_user(session["uuid"])
+        if user is None:
+            del session["uuid"]
+            return render_template("public/about.html")
+        elif not user.is_verified:
+            return redirect(url_for("verify"))
+        elif user.college not in college_short_names:
+            return redirect(url_for("college_select"))
+        return render_template("user/home.html")
+
+    @app.route("/signin")
+    @displays_error
+    def signin(error):
+        if "uuid" in session:
+            return redirect(url_for("landing_page"))
+        return render_template("public/sign-in.html", error=error)
+
+    @app.route("/signup", methods=["GET"])
+    @displays_error
+    def signup(error):
+        if "uuid" in session:
+            return redirect(url_for("landing_page"))
+        return render_template("public/sign-up.html", error=error)
+
+    @app.route("/verify", methods=["GET"])
+    @requires_signin
+    @requires_verified(False)
+    @displays_error
+    def verify(error):
+        return render_template("user/verify.html", error=error)
+
+    @app.route("/choose-college")
+    @requires_signin
+    def college_select():
+        return render_template("user/college-selection.html")
+
+    @app.route("/admin/message", methods=["GET"])
+    @requires_role(ROLE_ADMIN)
+    @displays_error
+    def message(error):
+        return render_template("admin/mass-message.html", error=error)
+
+    @app.route("/codes", methods=["GET"])
+    @requires_role(ROLE_MARKETER)
+    @displays_error
+    def view_codes(error):
+        return render_template("admin/view-codes.html", error=error)
+
+    @app.route("/classes/add", methods=["GET"])
+    @requires_signin
+    @requires_paid(True)
+    @displays_error
+    def add(error):
+        return render_template("user/add.html", error=error)
+
+    @app.route("/forgot-password")
+    @displays_error
+    def forgot_page(error):
+        return render_template("public/forgot.html", error=error)
+
+    @app.route("/reset-password/<reset_uuid>")
+    @displays_error
+    def reset_password_page(error, reset_uuid):
+        return render_template("public/set-password.html", reset_uuid=reset_uuid, error=error)
+
+    @app.route("/settings/<prop>", methods=["GET"])
+    @requires_signin
+    @displays_error
+    def settings(error, prop):
+        if prop == "password":
+            return render_template("user/settings/password.html", error=error)
+        elif prop == "notification":
+            return render_template("user/settings/notification.html", error=error)
+        elif prop == "delete":
+            return render_template("user/settings/delete.html", error=error)
+        else:
+            return render_template("user/settings/settings.html", error=error)
+
+    @app.route("/settings", methods=["GET"])
+    @requires_signin
+    @displays_error
+    def settings_list(error):
+        return render_template("user/settings/settings.html", error=error)
+
+    @app.route("/view-accounts", methods=["GET"])
+    @requires_role(ROLE_ADMIN)
+    def view_accounts():
+        return render_template("admin/view-accounts.html")
+
+    @app.route("/activate", methods=["GET"])
+    @requires_paid(False)
+    @displays_error
+    def activate(error):
+        return render_template("user/activate.html", error=error)
+
+    @app.route("/contact")
+    @displays_error
+    def contact_page(error):
+        return render_template("public/contact.html", error=error)
+
+    @app.route("/request")
+    @displays_error
+    def college_request_page(error):
+        return render_template("public/contact.html", error=error, college_request=True)
+
+    @app.route("/privacy")
+    def privacy_page():
+        return render_template("public/privacy.html")
+
+    @app.route("/terms")
+    def terms_page():
+        return render_template("public/terms.html")
+
+    @app.route("/about")
+    def about_page():
+        return render_template("public/about.html")

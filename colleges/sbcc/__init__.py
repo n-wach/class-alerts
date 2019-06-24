@@ -3,7 +3,7 @@ from urllib.request import urlopen
 
 from jinja2 import Template
 
-from DB import ClassMonitor, db
+from db import ClassMonitor, db
 from decorators import errors
 from colleges.generic import College
 

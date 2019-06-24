@@ -1,8 +1,21 @@
+import re
 from functools import wraps
 
 from flask import session, url_for, abort, redirect, request
 
-from DB import get_user
+from db import get_user
+
+
+PATTERN_UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+PATTERN_MASS_MESSAGE = re.compile(r".{20,}")
+PATTERN_CODE = re.compile(r"[A-z0-9]{5,}")
+PATTERN_TARGET_ROLE = re.compile(r"[14]")
+PATTERN_NOT_EMPTY = re.compile(r"\S+")
+PATTERN_PASSWORD = re.compile(r".{6,}")
+PATTERN_EMAIL = re.compile(r"[0-9]{0,11}")
+PATTERN_PHONE = re.compile(r"1[0-9]{10}")
+PATTERN_CRN = re.compile(r"[0-9]{5}")
+PATTERN_TERM = re.compile(r"[0-9]{6}")
 
 
 def errors(error, return_page, **kwargs):

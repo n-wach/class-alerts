@@ -6,7 +6,7 @@ from datetime import datetime
 import bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
-from Notifier import send_activation_email, send_deactivation_email, send_password_change_email, \
+from notifier import send_activation_email, send_deactivation_email, send_password_change_email, \
     send_class_closed_email, send_class_open_email, send_class_remind_email,\
     send_call_open, send_call_remind, \
     send_sms_open, send_sms_remind, send_sms_close
