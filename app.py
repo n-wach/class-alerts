@@ -47,10 +47,6 @@ import payments
 payments.route(app)
 
 
-print("Loading Notifier templates")
-prepare_templates(app)
-
-
 print("Adding CSRF Request Handlers")
 
 
@@ -112,6 +108,10 @@ with app.app_context():
                                  colleges=colleges,
                                  get_user_college=get_user_college,
                                  time=time)
+
+
+print("Loading Notifier templates")
+prepare_templates(app)
 
 
 print("Creating Database Manager")

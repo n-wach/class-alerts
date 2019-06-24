@@ -1,11 +1,12 @@
 import os
 
+from flask import url_for, redirect, render_template, request, session
 from paypal import PayPalConfig
 from paypal import PayPalInterface
 
-from db import Payment
+from db import Payment, User
 from decorators import requires_paid, requires_signin
-from app import current_user, get_user_college, url_for, db, redirect, render_template, request
+from app import get_user_college, db
 
 
 # SANBOX CREDS
@@ -32,9 +33,9 @@ def route(app):
     @requires_signin
     @requires_paid(paid=False)
     def paypal_redirect():
-        cur_user = current_user()
+        cur_user = User.query.filter_by(uuid=session["uuid"]).first()
         PAYPAL_UUID_PURCHASE = {
-            'amt': get_user_college(current_user()).renewal_cost,
+            'amt': get_user_college(cur_user).renewal_cost,
             'currencycode': 'USD',
             'returnurl': url_for('paypal_confirm', _external=True),
             'cancelurl': url_for('paypal_cancel', _external=True),
