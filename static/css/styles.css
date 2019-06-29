@@ -68,12 +68,17 @@ a {
     overflow-y:auto;
     z-index:5
 }
+.mdl-list__item-primary-content {
+    height: fit-content !important;
+}
 .mdl-list__item--three-line {
-    height: 95px;
+    min-height: 95px;
+    height: fit-content !important;
 }
 .mdl-list__item--three-line .mdl-list__item-text-body {
     margin-left: 70px;
-    height: 60px;
+    min-height: 60px;
+    height: fit-content !important;
 }
 .mdl-list__item--three-line .mdl-list__item-primary-content .mdl-list__item-avatar {
     width: 55px;
@@ -211,10 +216,6 @@ header a.mdl-layout-title {
     color: white;
     font-size: 24px;
     font-weight: 400 !important;
-}
-
-.cards ul {
-    padding: 0;
 }
 
 .cards {
