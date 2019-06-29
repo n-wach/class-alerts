@@ -10,7 +10,7 @@ from flask_apscheduler import APScheduler
 
 from db import db, User, update_all, FreePaymentCode
 from notifier import prepare_templates
-from colleges import colleges, get_user_college
+from colleges import colleges
 
 print("Setting up...")
 app = Flask(__name__,
@@ -68,19 +68,14 @@ def csrf_pop(response):
     return response
 
 
+def get_new_csrf_token():
+    token = str(uuid.uuid4())
+    session["csrf_token"] = token
+    return token
+
+
 print("Defining Jinja Globals...")
 with app.app_context():
-    def get_new_csrf_token():
-        token = str(uuid.uuid4())
-        session["csrf_token"] = token
-        return token
-
-    def get_all_users():
-        return User.query.all()
-
-    def get_all_codes():
-        return FreePaymentCode.query.all()
-
     def current_user():
         if "uuid" in session:
             return User.query.filter_by(uuid=session["uuid"]).first()
@@ -101,12 +96,9 @@ with app.app_context():
     app.jinja_env.filters["timedelta"] = time_delta
     app.jinja_env.filters["date"] = format_date
     app.jinja_env.globals.update(get_random_color=get_random_color,
-                                 get_all_users=get_all_users,
-                                 get_all_codes=get_all_codes,
                                  get_new_csrf_token=get_new_csrf_token,
                                  current_user=current_user,
                                  colleges=colleges,
-                                 get_user_college=get_user_college,
                                  time=time)
 
 

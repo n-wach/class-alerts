@@ -6,7 +6,7 @@ from paypal import PayPalInterface
 
 from db import Payment, User
 from decorators import requires_paid, requires_signin
-from app import get_user_college, db
+from app import db
 
 
 # SANBOX CREDS
@@ -35,7 +35,7 @@ def route(app):
     def paypal_redirect():
         cur_user = User.query.filter_by(uuid=session["uuid"]).first()
         PAYPAL_UUID_PURCHASE = {
-            'amt': get_user_college(cur_user).renewal_cost,
+            'amt': cur_user.get_college().renewal_cost,
             'currencycode': 'USD',
             'returnurl': url_for('paypal_confirm', _external=True),
             'cancelurl': url_for('paypal_cancel', _external=True),

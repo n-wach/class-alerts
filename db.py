@@ -111,6 +111,9 @@ class User(db.Model):
     def get_friendly_name(self):
         return "{}: {}".format(self.get_status(), self.email)
 
+    def get_college(self):
+        return get_user_college(self)
+
     def __str__(self):
         return "<{}>".format(self.get_friendly_name())
 
@@ -343,3 +346,6 @@ def attempt_get_user(email, password):
 
 def get_user(u):
     return User.query.filter_by(uuid=u).first()
+
+
+from colleges import get_user_college

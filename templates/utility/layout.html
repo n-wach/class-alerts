@@ -1,6 +1,8 @@
 <!doctype html>
 {% set user = current_user() %}
-{% set user_college = get_user_college(user) %}
+{% if user != None %}
+  {% set user_college = user.get_college() %}
+{% endif %}
 <html lang="en-US">
 <head>
   {% block head %}
