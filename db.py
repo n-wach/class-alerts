@@ -14,9 +14,9 @@ from notifier import send_activation_email, send_deactivation_email, send_passwo
 db = SQLAlchemy()
 db.session.expire_on_commit = False
 
-ROLE_ADMIN = 0
-ROLE_MARKETER = 1
-ROLE_USER = 2
+ROLE_ADMIN = 10
+ROLE_MARKETER = 100
+ROLE_USER = 200
 
 
 class User(db.Model):
@@ -182,7 +182,10 @@ class FreePaymentCode(db.Model):
         user.is_paid = True
         self.is_used = True
         self.used_on = datetime.now()
-        send_activation_email(user)
+        transaction_info = "Used Free Payment Code '{}'<br>\n" \
+                           "TIME: {}<br>\n".format(self.code,
+                                                   self.used_on)
+        send_activation_email(user, transaction_info)
         db.session.commit()
 
     def __str__(self):
@@ -205,12 +208,12 @@ class Payment(db.Model):
         self.is_complete = False
         self.started_at = datetime.now()
 
-    def process(self):
+    def process(self, transaction_info):
         if self.is_complete:
             return
         user = User.query.filter_by(uuid=self.account_uuid).first()
         user.is_paid = True
-        send_activation_email(user)
+        send_activation_email(user, transaction_info)
         self.is_complete = True
         self.completed_at = datetime.now()
 

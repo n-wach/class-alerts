@@ -8,7 +8,6 @@ from db import Payment, User
 from decorators import requires_paid, requires_signin
 from app import get_user_college, db
 
-
 # SANBOX CREDS
 pp_config_sandbox = PayPalConfig(API_USERNAME="sbccalerts-merchant_api1.gmail.com",
                                  API_PASSWORD=os.environ.get("PAYPAL_DEV_PASSWORD"),
@@ -35,7 +34,7 @@ def route(app):
     def paypal_redirect():
         cur_user = User.query.filter_by(uuid=session["uuid"]).first()
         PAYPAL_UUID_PURCHASE = {
-            'amt': get_user_college(cur_user).renewal_cost,
+            'amt': cur_user.get_college().renewal_cost,
             'currencycode': 'USD',
             'returnurl': url_for('paypal_confirm', _external=True),
             'cancelurl': url_for('paypal_cancel', _external=True),
@@ -77,7 +76,16 @@ def route(app):
         payment.set_email(checkout_response['EMAIL'])
 
         if checkout_response['CHECKOUTSTATUS'] == 'PaymentActionCompleted':
-            payment.process()
+            transaction_info = "TIME: {}<br>\n" \
+                               "TOKEN: {}<br>\n" \
+                               "EMAIL: {}<br>\n" \
+                               "AMOUNT: {} {}<br>\n".format(checkout_response["TIMESTAMP"],
+                                                            checkout_response["TOKEN"],
+                                                            checkout_response["EMAIL"],
+                                                            checkout_response["AMT"],
+                                                            checkout_response["CURRENCYCODE"])
+
+            payment.process(transaction_info)
             payment.set_status(1)
 
         return render_template("payments/payment-status.html", resp=checkout_response, payment=payment)
