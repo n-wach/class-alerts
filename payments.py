@@ -4,9 +4,12 @@ from flask import url_for, redirect, render_template, request, session
 from paypal import PayPalConfig
 from paypal import PayPalInterface
 
-from db import Payment, User
+from db import Payment, User, db, get_user
 from decorators import requires_paid, requires_signin
-from app import get_user_college, db
+
+import logging
+logger = logging.getLogger("app.payments")
+
 
 # SANBOX CREDS
 pp_config_sandbox = PayPalConfig(API_USERNAME="sbccalerts-merchant_api1.gmail.com",
@@ -32,17 +35,20 @@ def route(app):
     @requires_signin
     @requires_paid(paid=False)
     def paypal_redirect():
-        cur_user = User.query.filter_by(uuid=session["uuid"]).first()
-        PAYPAL_UUID_PURCHASE = {
-            'amt': cur_user.get_college().renewal_cost,
+        user = get_user(session["uuid"])
+        logger.info("New Payment for {}".format(user))
+        purchase_info = {
+            'amt': user.get_college().renewal_cost,
             'currencycode': 'USD',
             'returnurl': url_for('paypal_confirm', _external=True),
             'cancelurl': url_for('paypal_cancel', _external=True),
             'paymentaction': 'Sale',
         }
-        setexp_response = pp_interface.set_express_checkout(**PAYPAL_UUID_PURCHASE)
+        logger.debug("Payment creation info: {}".format(purchase_info))
+        setexp_response = pp_interface.set_express_checkout(**purchase_info)
         r_token = setexp_response['TOKEN']
-        payment = Payment(r_token, cur_user)
+        logger.debug("Payment checkout info: {}".format(setexp_response))
+        payment = Payment(r_token, user)
         db.session.add(payment)
         db.session.commit()
         return redirect(pp_interface.generate_express_checkout_redirect_url(r_token))
@@ -50,12 +56,13 @@ def route(app):
     @app.route("/paypal/confirm")
     def paypal_confirm():
         getexp_response = pp_interface.get_express_checkout_details(token=request.args.get('token', ''))
-
+        logger.debug("Payment confirm info: {}".format(getexp_response))
         return render_template("payments/payment-info.html", resp=getexp_response)
 
     @app.route("/paypal/do/<string:token>")
     def paypal_do(token):
         getexp_response = pp_interface.get_express_checkout_details(token=token)
+        logger.debug("Preparing checkout: {}".format(getexp_response))
         kw = {
             'amt': getexp_response['AMT'],
             'paymentaction': 'Sale',
@@ -63,6 +70,7 @@ def route(app):
             'token': token,
             'currencycode': getexp_response['CURRENCYCODE']
         }
+        logger.debug("Preforming checkout: {}".format(kw))
         pp_interface.do_express_checkout_payment(**kw)
 
         return redirect(url_for('paypal_status', token=kw['token']))
@@ -70,10 +78,14 @@ def route(app):
     @app.route("/paypal/status/<string:token>")
     def paypal_status(token):
         checkout_response = pp_interface.get_express_checkout_details(token=token)
+        logger.debug("Checkout response: {}".format(checkout_response))
+
         payment = Payment.query.filter_by(token=token).first()
         if payment is None:
+            logger.info("Unknown payment token: {}".format(token))
             return "Failed. Token: " + str(token)
-        payment.set_email(checkout_response['EMAIL'])
+
+        logger.info("Performed checkout for {}".format(payment))
 
         if checkout_response['CHECKOUTSTATUS'] == 'PaymentActionCompleted':
             transaction_info = "TIME: {}<br>\n" \
@@ -86,7 +98,10 @@ def route(app):
                                                             checkout_response["CURRENCYCODE"])
 
             payment.process(transaction_info)
-            payment.set_status(1)
+            logger.info("Processed {}".format(payment))
+
+        else:
+            logger.info("Incorrect checkout status.  Payment {} will not be accepted.".format(payment))
 
         return render_template("payments/payment-status.html", resp=checkout_response, payment=payment)
 
@@ -94,5 +109,5 @@ def route(app):
     def paypal_cancel():
         payment = Payment.query.filter_by(token=request.args.get('token', '')).first()
         if payment is not None:
-            payment.cancel()
+            payment.delete()
         return redirect(url_for('landing_page'))

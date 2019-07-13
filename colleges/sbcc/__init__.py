@@ -25,9 +25,9 @@ class SBCC(College):
     PATTERN_TERM = re.compile(r"[0-9]{6}")
 
     @staticmethod
-    def verify_add_request(request):
-        term = request.form.get("term")
-        crn = request.form.get("crn")
+    def verify_add_request(form):
+        term = form.get("term")
+        crn = form.get("crn")
         if term is None:
             return errors("Term is missing", "add")
         if crn is None:
@@ -56,20 +56,18 @@ class SBCC(College):
 
     class Class(College.Class):
         base_url = "https://banner.sbcc.edu/PROD/pw_pub_sched"
-        vsub = re.compile("(dept=)([A-Z]+)")
-        vcrse = re.compile("(course=)(\d+)")
-        availability = r"<td class=\"default3\">(-?\d*)</td>"
+        PATTERN_AVAIL = re.compile(r"<td class=\"default3\">(-?\d*)</td>")
+        PATTERN_VSUB = re.compile(r"(dept=)([A-z]+)")
+        PATTERN_VCRSE = re.compile(r"(course=)(\d+)")
 
         def __init__(self, crn, term):
             super().__init__()
             self.url = SBCC.Class.base_url + ".p_course_popup?vterm={}&vcrn={}".format(term, crn)
-            print(self.url)
             html = urlopen(self.url).read().decode()
-            print(html)
             self.vcrn = crn
             self.vterm = term
-            self.vsub = SBCC.Class.vsub.search(html).group(2)
-            self.vcrse = SBCC.Class.vcrse.search(html).group(2)
+            self.vsub = SBCC.Class.PATTERN_VSUB.search(html).group(2)
+            self.vcrse = SBCC.Class.PATTERN_VCRSE.search(html).group(2)
             self.total_normal_seats = 0
             self.normal_seats_avail = 0
             self.total_waitlist_seats = 0
@@ -85,7 +83,7 @@ class SBCC(College):
 
         def update_status(self):
             html = urlopen(self.url).read().decode()
-            a = re.findall(SBCC.Class.availability, html)
+            a = SBCC.Class.PATTERN_AVAIL.findall(html)
             self.total_normal_seats = int("".join(a[0]))
             self.normal_seats_avail = int("".join(a[2]))
             self.total_waitlist_seats = int("".join(a[3]))

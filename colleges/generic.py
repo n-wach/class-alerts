@@ -1,9 +1,15 @@
+from jinja2 import Template
+
+
 class College:
     short_name = "GC"
     name = "Generic College"
     icon = "dog.png"
     renewal_period = "quarter"
     renewal_cost = 3
+
+    add_template_params = {}
+    add_template = Template("<p>Generic College Add Template</p>")
 
     @staticmethod
     def verify_add_request(request):

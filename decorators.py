@@ -5,6 +5,10 @@ from flask import session, url_for, abort, redirect, request
 
 from db import get_user
 
+import logging
+
+logger = logging.getLogger("app.decorators")
+
 
 PATTERN_UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 PATTERN_MASS_MESSAGE = re.compile(r".{20,}")
@@ -19,6 +23,7 @@ PATTERN_TERM = re.compile(r"[0-9]{6}")
 
 
 def errors(error, return_page, **kwargs):
+    logger.debug("Redirecting to '{}' with error '{}'".format(return_page, error))
     session["display_error"] = error
     return redirect(url_for(return_page, **kwargs))
 
@@ -27,6 +32,7 @@ def requires_signin(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if "uuid" not in session:
+
             return redirect(url_for("signin"))
         else:
             user = get_user(session["uuid"])

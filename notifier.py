@@ -28,13 +28,9 @@ TEMPLATE_CLASS_STATUS_OPEN = None
 TEMPLATE_CLASS_STATUS_CLOSE = None
 TEMPLATE_PASSWORD_RESET_REQUEST = None
 TEMPLATE_PASSWORD_CHANGE = None
-app = None
 
 
-def prepare_templates(a):
-    global app
-    app = a
-
+def prepare_templates(app):
     global TEMPLATE_VERIFICATION
     global TEMPLATE_ACTIVATED
     global TEMPLATE_DEACTIVATED
@@ -103,7 +99,7 @@ def send_call(raw_phone, url):
 
 
 def send_call_open(user, monitor):
-    send_call(user.phone, "https://classalerts.org/voice/open")
+    send_call(user.phone, url_for("voice_open", monitor=monitor.uuid))
 
 
 def send_call_remind(user, monitor):
