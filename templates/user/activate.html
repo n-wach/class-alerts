@@ -26,7 +26,7 @@
     <p>
       Have a code? Enter it below to receive a free {{ user_college.renewal_period }}!
     </p>
-    {% call make_form(url_for('do_use_free_code'), error) %}
+    {% call make_form(url_for('api_codes_use'), error) %}
       {{ make_input_field("text", "code", "Code", "[A-z0-9]{5,}", "Codes must be at least 5 characters (letters and numbers only)", required=True) }}
       {{ make_button("Submit Code") }}
     {% endcall %}

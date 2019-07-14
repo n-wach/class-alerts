@@ -4,7 +4,7 @@ from flask import session, request, url_for, redirect, abort, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from db import get_user, db, attempt_get_user, User, ROLE_ADMIN, ClassRequest, ROLE_MARKETER, FreePaymentCode, \
+from db import get_user, db, User, ROLE_ADMIN, ClassRequest, ROLE_MARKETER, FreePaymentCode, \
     PasswordResetRequest
 from notifier import send_verification_email, send_password_reset_email, send_contact_email
 from app import MAX_USER_REQUESTS
@@ -23,9 +23,9 @@ def route(app):
         limiter.logger.addHandler(handler)
 
     @app.route("/api/signin", methods=["POST"])
-    @requires_form_field("email", if_missing="Email missing", redirect_url_for="login",
+    @requires_form_field("email", if_missing="Email missing", redirect_url_for="signup",
                          value_pattern=PATTERN_NOT_EMPTY)
-    @requires_form_field("password", if_missing="Password missing", redirect_url_for="login",
+    @requires_form_field("password", if_missing="Password missing", redirect_url_for="signup",
                          value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
     @limiter.limit("10 per hour")
     def api_signin():
@@ -81,7 +81,7 @@ def route(app):
             db.session.add(user)
             db.session.commit()
             send_verification_email(user)
-            return redirect(url_for("verify"))
+            return redirect(url_for("verify_email"))
 
     @app.route("/api/user/verify-email/<code>")
     @requires_signin
@@ -91,13 +91,13 @@ def route(app):
         user = get_user(session["uuid"])
         if not PATTERN_UUID.match(code):
             logger.info("Malformed or missing verify code '{}' from {}".format(code, user))
-            return errors("Verification code missing or invalid format.  Please try again or contact support", "verify_page")
+            return errors("Verification code missing or invalid format.  Please try again or contact support", "verify_email")
         if code == user.verify_code:
             user.is_verified = True
             db.session.commit()
         else:
             logger.info("Invalid verify code '{}' from {}".format(code, user))
-            return errors("Verification failed.  Please try again or contact support", "verify_page")
+            return errors("Verification failed.  Please try again or contact support", "verify_email")
         return redirect(url_for("landing_page"))
 
     @app.route("/api/user/choose-college", methods=["POST"])
@@ -133,16 +133,16 @@ def route(app):
             verified = college.verify_add_request(request.form)
             if verified is not True:
                 logger.info("Invalid add request '{}' for {} by {}".format(request.form, college, user))
-                return errors("Invalid add request", "add")
+                return errors("Invalid add request", "class_add")
 
             class_monitor = college.monitor_from_add_request(request)
 
             if len(ClassRequest.query.filter_by(monitor_uuid=class_monitor.uuid, requester_uuid=user.uuid).all()) > 0:
                 logger.info("Duplicate add request for {} by {}".format(class_monitor, user))
-                return errors("You've already added this class!", "add")
+                return errors("You've already added this class!", "class_add")
             elif len(user.get_requests()) >= MAX_USER_REQUESTS:
                 logger.info("Attempt to request more than {} classes by {}".format(MAX_USER_REQUESTS, user))
-                return errors("You can't request more than {} classes at a time.".format(MAX_USER_REQUESTS), "add")
+                return errors("You can't request more than {} classes at a time.".format(MAX_USER_REQUESTS), "class_add")
             else:
                 req = ClassRequest(user, class_monitor)
                 db.session.add(req)
@@ -152,7 +152,7 @@ def route(app):
         except Exception as e:
             logger.exception("Error adding class for {} at {} with request '{}'".format(user, college, request.form))
             return errors("We're sorry. Something went wrong when adding that class. Make sure everything is correct, "
-                          "then contact support.", "add")
+                          "then contact support.", "class_add")
 
     @app.route("/api/classes/remove", methods=["POST"])
     @requires_signin
@@ -170,7 +170,7 @@ def route(app):
 
     @app.route("/api/admin/message", methods=["POST"])
     @requires_role(ROLE_ADMIN)
-    @requires_form_field("message", if_missing="Missing message", redirect_url_for="message",
+    @requires_form_field("message", if_missing="Missing message", redirect_url_for="admin_message",
                          value_pattern=PATTERN_MASS_MESSAGE, if_invalid="Message too short!")
     @limiter.limit("5 per hour")
     def api_admin_message():
@@ -178,7 +178,7 @@ def route(app):
 
     @app.route("/api/admin/generate-free-code", methods=["POST"])
     @requires_role(ROLE_MARKETER)
-    @requires_form_field("code", if_missing="Missing code", redirect_url_for="view_codes",
+    @requires_form_field("code", if_missing="Missing code", redirect_url_for="admin_codes_view",
                          value_pattern=PATTERN_CODE,
                          if_invalid="Codes must be at least 5 characters (letters and numbers only)")
     def api_admin_codes_generate():
@@ -186,38 +186,38 @@ def route(app):
         code = request.form.get("code").lower()
         if len(FreePaymentCode.query.filter_by(code=code).all()) > 0:
             logging.info("{} tried to generate existing code '{}'".format(user, code))
-            return errors("Code has already been generated.", "view_codes")
+            return errors("Code has already been generated.", "admin_codes_view")
         else:
             p = FreePaymentCode(code, user)
             logger.info("{} generated code {}".format(user, p))
             db.session.add(p)
             db.session.commit()
-            return redirect(url_for("view_codes"))
+            return redirect(url_for("admin_codes_view"))
 
     @app.route("/api/admin/delete-free-code", methods=["POST"])
     @requires_role(ROLE_MARKETER)
-    @requires_form_field("delete-code", if_missing="Missing code", redirect_url_for="view_codes",
+    @requires_form_field("delete-code", if_missing="Missing code", redirect_url_for="admin_codes_view",
                          value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
     def api_admin_codes_delete():
         user = get_user(session["uuid"])
         code = request.form.get("delete-code").lower()
         if len(FreePaymentCode.query.filter_by(code=code).all()) == 0:
             logger.info("{} tried deleting non-existent code '{}'".format(user, code))
-            return errors("Code does not exist.", "view_codes")
+            return errors("Code does not exist.", "admin_codes_view")
         else:
             fpc = FreePaymentCode.query.filter_by(code=code).first()
             if fpc.is_used:
                 logger.info("{} tried deleting consumed code '{}'".format(user, code))
-                return errors("Code has already been used, and cannot be deleted.", "view_codes")
+                return errors("Code has already been used, and cannot be deleted.", "admin_codes_view")
             else:
                 logger.info("{} deleted {}".format(user, fpc))
                 fpc.delete()
                 db.session.commit()
-                return redirect(url_for("view_codes"))
+                return redirect(url_for("admin_codes_view"))
 
     @app.route("/api/user/use-free-code", methods=["POST"])
     @requires_paid(paid=False)
-    @requires_form_field("code", if_missing="Missing code", redirect_url_for="view_codes",
+    @requires_form_field("code", if_missing="Missing code", redirect_url_for="activate",
                          value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
     @limiter.limit("20 per day")
     def api_codes_use():
@@ -226,10 +226,10 @@ def route(app):
         fpc = FreePaymentCode.query.filter_by(code=code).first()
         if fpc is None:
             logger.info("{} tried using non-existent code '{}'".format(user, code))
-            return errors("Code does not exist", "renew")
+            return errors("Code does not exist", "activate")
         elif fpc.is_used:
             logger.info("{} tried using expired code '{}'").format(user, code)
-            return errors("Code has already been used", "renew")
+            return errors("Code has already been used", "activate")
         else:
             fpc.use(user)
             logger.info("{} used {}".format(user, fpc))
@@ -245,13 +245,13 @@ def route(app):
             logger.info("{} set {} to {}".format(user, target, "paid" if is_paid else "unpaid"))
             target.is_paid = is_paid
             db.session.commit()
-            return redirect(url_for("view_all"))
+            return redirect(url_for("admin_users_view"))
         else:
             logger.info("{} failed to set {} to {} because of insufficient role".format(user, target, "paid" if is_paid else "unpaid"))
             return abort(403, "Insufficient Role")
 
     @app.route("/api/user/forgot-password", methods=["POST"])
-    @requires_form_field("email", if_missing="Email missing", redirect_url_for="forgot_page",
+    @requires_form_field("email", if_missing="Email missing", redirect_url_for="forgot_password",
                          value_pattern=PATTERN_EMAIL)
     @limiter.limit("5 per hour")
     def api_send_forgot_password():
@@ -271,28 +271,27 @@ def route(app):
     @app.route("/api/user/reset-password/<reset_uuid>", methods=["POST"])
     @limiter.limit("5 per hour")
     def api_reset_password(reset_uuid):
-        prr = PasswordResetRequest.query.filter_by(uuid=reset_uuid).first()
         password = request.form.get("password", "")
         c_password = request.form.get("c_password", "")
         # we should check password first to avoid leaking whether UUID is valid PRR
         if len(password) < 6:
             logger.info("Password reset for uuid {} failed: invalid length".format(reset_uuid))
-            return errors("Password must be at least 6 characters", "reset_password_page", reset_uuid=reset_uuid)
+            return errors("Password must be at least 6 characters", "reset_password", reset_uuid=reset_uuid)
         if password != c_password:
             logger.info("Password reset for uuid {} failed: no match".format(reset_uuid))
-            return errors("Passwords do not match", "reset_password_page", reset_uuid=reset_uuid)
+            return errors("Passwords do not match", "reset_password", reset_uuid=reset_uuid)
 
         prr = PasswordResetRequest.query.filter_by(uuid=reset_uuid).first()
         if not prr:
             logger.info("Attempt to use non-existent reset UUID: {}".format(reset_uuid))
-            return errors("Invalid or Expired Reset Code", "reset_password_page", reset_uuid=reset_uuid)
+            return errors("Invalid or Expired Reset Code", "reset_password", reset_uuid=reset_uuid)
         else:
             if prr.attempt_use(password):
                 logger.info("Successfully used {}".format(prr))
                 return errors("Password reset", "signin")
             else:
                 logger.info("Attempt to use expired {}".format(prr))
-                return errors("Invalid or Expired Reset Code", "reset_password_page", reset_uuid=reset_uuid)
+                return errors("Invalid or Expired Reset Code", "reset_password", reset_uuid=reset_uuid)
 
     @app.route("/api/admin/delete-uuid", methods=["POST"])
     @requires_signin
@@ -309,7 +308,7 @@ def route(app):
         if user.role < to_delete.role:
             to_delete.delete()
             logger.info("{} deleted user {}".format(user, to_delete))
-            return redirect(url_for("view_all"))
+            return redirect(url_for("admin_users_view"))
         else:
             logger.info("{} attempted to delete {} but had an insufficient role".format(user, to_delete))
             abort(401, "Insufficient Role")
@@ -322,7 +321,7 @@ def route(app):
             session.clear()
             user.delete()
             logger.info("{} deleted their account".format(user))
-            return errors("Your account has been deleted", "sign-up")
+            return errors("Your account has been deleted", "signup")
         else:
             logger.info("{} failed to delete their account".format(user))
             abort(400, "Something went wrong.")
@@ -383,9 +382,9 @@ def route(app):
         elif prop == "delete":
             logger.info("{} is going to delete their account".format(user))
             session["confirm-delete"] = "yes"
-            return redirect(url_for("delete_me"))
+            return redirect(url_for("api_user_delete_self"))
         else:
-            return errors("Nothing to update", "settings")
+            return errors("Nothing to update", "settings_list")
 
     @app.route("/api/signout")
     def api_signout():

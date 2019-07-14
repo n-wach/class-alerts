@@ -21,12 +21,12 @@
     <td>
       {% if u.role > user.role %}
         {% if u.is_paid %}
-          <span onclick="post('{{ url_for('set_paid') }}', {'target-uuid': '{{ u.uuid }}', 'is-paid': false})"
+          <span onclick="post('{{ url_for('api_admin_set_paid') }}', {'target-uuid': '{{ u.uuid }}', 'is-paid': false})"
                 class="listing-action mdl-button mdl-js-button mdl-button--colored">
             Disable
           </span>
         {% else %}
-          <span onclick="post('{{ url_for('set_paid') }}', {'target-uuid': '{{ u.uuid }}', 'is-paid': true})"
+          <span onclick="post('{{ url_for('api_admin_set_paid') }}', {'target-uuid': '{{ u.uuid }}', 'is-paid': true})"
                 class="listing-action mdl-button mdl-js-button mdl-button--colored">
             Enable
           </span>
@@ -36,7 +36,7 @@
       {% endif %}
     </td>
     <td>
-      <span onclick="post('{{ url_for('delete_uuid') }}', {'delete-uuid': '{{ u.uuid }}'})"
+      <span onclick="post('{{ url_for('api_user_delete') }}', {'delete-uuid': '{{ u.uuid }}'})"
             class="listing-action mdl-button mdl-js-button mdl-button--colored">
         Terminate
       </span>

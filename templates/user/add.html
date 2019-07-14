@@ -6,7 +6,7 @@
 {% endblock %}
 {% block body %}
   {% call centered_card("Add a class", "add-class", "green") %}
-    {% call make_form(url_for('add'), error) %}
+    {% call make_form(url_for('api_class_add'), error) %}
       {{ user_college.add_template.render(user_college.add_template_params) | safe }}
       {{ make_button("Add this class") }}
     {% endcall %}

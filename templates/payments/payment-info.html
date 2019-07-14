@@ -20,7 +20,7 @@
     {% else %}
       There was an unexpected error while processing your request.<br>
       Error code: <strong>{{ resp["ACK"] }}</strong>
-      Click <a href="{{ url_for('landing_page') }}">here</a> to try again.  Please <a href="{{ url_for('contact') }}">contact support</a> if the problem
+      Click <a href="{{ url_for('landing_page') }}">here</a> to try again.  Please <a href="{{ url_for('contact_page') }}">contact support</a> if the problem
       persists.
     {% endif %}
   {% endcall %}

@@ -6,7 +6,7 @@
 {% endblock %}
 {% block body %}
   {% call centered_card("Forgot Password", "forgot", "blue-grey") %}
-    {% call make_form(url_for("forgot"), error) %}
+    {% call make_form(url_for("api_send_forgot_password"), error) %}
       <p>Please enter your account's email address below. We will send you a link to reset your account's password.</p>
       {{ make_input_field("email", "email", "Email", required=True) }}
       {{ make_button("Send Password Reset Link") }}

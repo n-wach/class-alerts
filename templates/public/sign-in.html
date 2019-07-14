@@ -6,13 +6,13 @@
 {% endblock %}
 {% block body %}
   {% call centered_card("Sign In", "sign-in", "blue-grey") %}
-    {% call make_form(url_for("signin"), error) %}
+    {% call make_form(url_for("api_signin"), error) %}
       {{ make_input_field("email", "email", "Email", required=True) }}
       {{ make_input_field("password", "password", "Password", required=True) }}
       {{ make_button("Sign In") }}
       <div class="mdl-grid">
         <div class="mdl-layout-spacer"></div>
-        <a class="mdl-button mdl-js-button mdl-cell mdl-cell--5-col" href="{{ url_for('forgot_page') }}">Forgot
+        <a class="mdl-button mdl-js-button mdl-cell mdl-cell--5-col" href="{{ url_for('forgot_password') }}">Forgot
           Password</a>
         <div class="mdl-layout-spacer"></div>
         <a class="mdl-button mdl-js-button mdl-cell mdl-cell--5-col" href="{{ url_for('signup') }}">Sign Up</a>

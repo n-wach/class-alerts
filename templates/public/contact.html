@@ -6,7 +6,7 @@
 {% endblock %}
 {% block body %}
   {% call centered_card("Contact", "contact", "blue-grey") %}
-    {% call make_form(url_for("contact"), error) %}
+    {% call make_form(url_for("api_send_contact"), error) %}
       Please include your email so we can respond to your message.
       {% if user %}
         {{ make_input_field("email", "email", "Your Email", required=True, value=user.email) }}

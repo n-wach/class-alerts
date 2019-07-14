@@ -30,13 +30,13 @@ class UCSB(College):
         term = request.form.get("term")
         crn = request.form.get("crn")
         if term is None:
-            return errors("Term is missing", "add")
+            return errors("Term is missing", "class_add")
         if crn is None:
-            return errors("CRN is missing", "add")
+            return errors("CRN is missing", "class_add")
         if term not in SBCC.terms:
-            return errors("Invalid term", "add")
+            return errors("Invalid term", "class_add")
         if not SBCC.PATTERN_CRN.match(crn):
-            return errors("Invalid CRN", "add")
+            return errors("Invalid CRN", "class_add")
         return True
 
     @staticmethod

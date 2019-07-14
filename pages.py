@@ -16,7 +16,7 @@ def route(app):
             del session["uuid"]
             return render_template("public/about.html")
         elif not user.is_verified:
-            return redirect(url_for("verify"))
+            return redirect(url_for("verify_email"))
         elif user.college not in college_short_names:
             return redirect(url_for("college_select"))
         return render_template("user/home.html")

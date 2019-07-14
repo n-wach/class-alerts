@@ -6,7 +6,7 @@
 {% endblock %}
 {% block body %}
   {% call centered_card("Create an Account", "sign-up", "blue-grey") %}
-    {% call make_form(url_for('signup'), error) %}
+    {% call make_form(url_for('api_signup'), error) %}
       {{ make_input_field("email", "email", "Email", required=True) }}
       {{ make_input_field("password", "password", "Password", ".{6,}", "Password must be at least 6 characters", required=False) }}
       {{ make_input_field("password", "confirm", "Confirm Password", ".{6,}", "Password must be at least 6 characters", required=True) }}

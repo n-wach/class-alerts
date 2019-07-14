@@ -133,7 +133,7 @@ def send_email(recipient, subject, html=None, plain="Email only available in htm
 def send_verification_email(user):
     send_email(user.email, "Verify Your Email",
                TEMPLATE_VERIFICATION.render(user=user),
-               "Verification Link: " + url_for("do_verify", code=user.verify_code, _external=True))
+               "Verification Link: " + url_for("api_verify_email", code=user.verify_code, _external=True))
 
 
 def send_activation_email(user, transaction_info):

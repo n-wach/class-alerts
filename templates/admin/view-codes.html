@@ -18,7 +18,7 @@
     {% endif %}
     <td>
       {% if not code.is_used %}
-        <span onclick="post('{{ url_for('do_delete_code') }}', {'delete-code': '{{ code.code }}'})"
+        <span onclick="post('{{ url_for('api_admin_codes_delete') }}', {'delete-code': '{{ code.code }}'})"
               class="listing-action mdl-button mdl-js-button mdl-button--colored">
           Delete
         </span>
@@ -34,7 +34,7 @@
 {% block body %}
   <div class="content">
     {% call centered_card("Generate Free Payment Code", "free-code", "pink") %}
-      {% call make_form(url_for('do_generate_free_code'), error) %}
+      {% call make_form(url_for('api_admin_codes_generate'), error) %}
         <p>This code can be used by any user to pay for their account. Capitalization does not matter. Codes should be
           long and unpredictable.</p>
         {{ make_input_field("text", "code", "Code", "[A-z0-9]{5,}", "Codes must be at least 5 characters (letters and numbers only)", required=True) }}
