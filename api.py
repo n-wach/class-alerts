@@ -11,7 +11,7 @@ from app import MAX_USER_REQUESTS
 from colleges import college_short_names, get_user_college
 from decorators import requires_signin, requires_form_field, PATTERN_NOT_EMPTY, errors, PATTERN_PHONE, \
     requires_verified, PATTERN_UUID, requires_paid, PATTERN_MASS_MESSAGE, requires_role, PATTERN_EMAIL, PATTERN_CODE, \
-    PATTERN_PASSWORD
+    PATTERN_PASSWORD, PATTERN_TRUE
 
 import logging
 logger = logging.getLogger("app.api")
@@ -28,7 +28,7 @@ def route(app):
     @requires_form_field("password", if_missing="Password missing", redirect_url_for="login",
                          value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
     @limiter.limit("10 per hour")
-    def do_signin():
+    def api_signin():
         login_pw = request.form.get("password")
         login_email = request.form.get("email").lower()
 
@@ -46,8 +46,10 @@ def route(app):
                          value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
     @requires_form_field("confirm", if_missing="Password confirmation missing", redirect_url_for="signup",
                          value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
+    @requires_form_field("agree", if_missing="Terms and Policy agreement missing", redirect_url_for="signup",
+                         value_pattern=PATTERN_TRUE, repopulate=False)
     @limiter.limit("5 per day")
-    def do_signup():
+    def api_signup():
         create_email = request.form.get("email").lower()
         create_pw = request.form.get("password")
         confirm_pw = request.form.get("confirm")
@@ -85,7 +87,7 @@ def route(app):
     @requires_signin
     @requires_verified(False)
     @limiter.limit("20 per day")
-    def do_verify(code):
+    def api_verify_email(code):
         user = get_user(session["uuid"])
         if not PATTERN_UUID.match(code):
             logger.info("Malformed or missing verify code '{}' from {}".format(code, user))
@@ -103,7 +105,7 @@ def route(app):
     @requires_form_field("college", if_missing="College missing", redirect_url_for="landing_page",
                          value_pattern=PATTERN_NOT_EMPTY)
     @limiter.limit("20 per day")
-    def do_college_select():
+    def api_college_select():
         user = get_user(session["uuid"])
         college = request.form.get("college")
         ret = request.form.get("ret", url_for("landing_page"))
@@ -124,7 +126,7 @@ def route(app):
     @requires_signin
     @requires_paid(True)
     @limiter.limit("20 per day")
-    def do_add():
+    def api_class_add():
         user = get_user(session["uuid"])
         college = get_user_college(user)
         try:
@@ -154,7 +156,7 @@ def route(app):
 
     @app.route("/api/classes/remove", methods=["POST"])
     @requires_signin
-    def do_remove_class():
+    def api_class_remove():
         user = get_user(session["uuid"])
         try:
             monitor_uuid = request.form.get("uuid")
@@ -171,7 +173,7 @@ def route(app):
     @requires_form_field("message", if_missing="Missing message", redirect_url_for="message",
                          value_pattern=PATTERN_MASS_MESSAGE, if_invalid="Message too short!")
     @limiter.limit("5 per hour")
-    def do_message():
+    def api_admin_message():
         raise NotImplementedError("Message function temporarily disabled")
 
     @app.route("/api/admin/generate-free-code", methods=["POST"])
@@ -179,7 +181,7 @@ def route(app):
     @requires_form_field("code", if_missing="Missing code", redirect_url_for="view_codes",
                          value_pattern=PATTERN_CODE,
                          if_invalid="Codes must be at least 5 characters (letters and numbers only)")
-    def do_generate_free_code():
+    def api_admin_codes_generate():
         user = get_user(session["uuid"])
         code = request.form.get("code").lower()
         if len(FreePaymentCode.query.filter_by(code=code).all()) > 0:
@@ -192,31 +194,11 @@ def route(app):
             db.session.commit()
             return redirect(url_for("view_codes"))
 
-    @app.route("/api/user/use-free-code", methods=["POST"])
-    @requires_paid(paid=False)
-    @requires_form_field("code", if_missing="Missing code", redirect_url_for="view_codes",
-                         value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
-    @limiter.limit("20 per day")
-    def do_use_free_code():
-        user = get_user(session["uuid"])
-        code = request.form.get("code").lower()
-        fpc = FreePaymentCode.query.filter_by(code=code).first()
-        if fpc is None:
-            logger.info("{} tried using non-existent code '{}'".format(user, code))
-            return errors("Code does not exist", "renew")
-        elif fpc.is_used:
-            logger.info("{} tried using expired code '{}'").format(user, code)
-            return errors("Code has already been used", "renew")
-        else:
-            fpc.use(user)
-            logger.info("{} used {}".format(user, fpc))
-            return redirect(url_for("landing_page"))
-
     @app.route("/api/admin/delete-free-code", methods=["POST"])
     @requires_role(ROLE_MARKETER)
     @requires_form_field("delete-code", if_missing="Missing code", redirect_url_for="view_codes",
                          value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
-    def do_delete_code():
+    def api_admin_codes_delete():
         user = get_user(session["uuid"])
         code = request.form.get("delete-code").lower()
         if len(FreePaymentCode.query.filter_by(code=code).all()) == 0:
@@ -233,9 +215,29 @@ def route(app):
                 db.session.commit()
                 return redirect(url_for("view_codes"))
 
+    @app.route("/api/user/use-free-code", methods=["POST"])
+    @requires_paid(paid=False)
+    @requires_form_field("code", if_missing="Missing code", redirect_url_for="view_codes",
+                         value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
+    @limiter.limit("20 per day")
+    def api_codes_use():
+        user = get_user(session["uuid"])
+        code = request.form.get("code").lower()
+        fpc = FreePaymentCode.query.filter_by(code=code).first()
+        if fpc is None:
+            logger.info("{} tried using non-existent code '{}'".format(user, code))
+            return errors("Code does not exist", "renew")
+        elif fpc.is_used:
+            logger.info("{} tried using expired code '{}'").format(user, code)
+            return errors("Code has already been used", "renew")
+        else:
+            fpc.use(user)
+            logger.info("{} used {}".format(user, fpc))
+            return redirect(url_for("landing_page"))
+
     @app.route("/api/admin/set-paid", methods=["POST"])
     @requires_role(ROLE_MARKETER)
-    def set_paid():
+    def api_admin_set_paid():
         target = get_user(request.form.get("target-uuid"))
         is_paid = request.form.get("is-paid") == "true"
         user = get_user(session["uuid"])
@@ -252,7 +254,7 @@ def route(app):
     @requires_form_field("email", if_missing="Email missing", redirect_url_for="forgot_page",
                          value_pattern=PATTERN_EMAIL)
     @limiter.limit("5 per hour")
-    def forgot():
+    def api_send_forgot_password():
         email = request.form.get("email").lower()
         user = User.query.filter_by(email=email).first()
         if user:
@@ -268,7 +270,8 @@ def route(app):
 
     @app.route("/api/user/reset-password/<reset_uuid>", methods=["POST"])
     @limiter.limit("5 per hour")
-    def reset_password(reset_uuid):
+    def api_reset_password(reset_uuid):
+        prr = PasswordResetRequest.query.filter_by(uuid=reset_uuid).first()
         password = request.form.get("password", "")
         c_password = request.form.get("c_password", "")
         # we should check password first to avoid leaking whether UUID is valid PRR
@@ -294,7 +297,7 @@ def route(app):
     @app.route("/api/admin/delete-uuid", methods=["POST"])
     @requires_signin
     @requires_role(ROLE_MARKETER)
-    def delete_uuid():
+    def api_user_delete():
         user = get_user(session["uuid"])
         to_delete = get_user(request.form("delete-uuid"))
         if not to_delete:
@@ -313,7 +316,7 @@ def route(app):
 
     @app.route("/api/user/delete-me", methods=["POST"])
     @requires_signin
-    def delete_me():
+    def api_user_delete_self():
         user = get_user(session["uuid"])
         if session["confirm-delete"] == "yes":
             session.clear()
@@ -326,7 +329,7 @@ def route(app):
 
     @app.route("/api/user/settings/<prop>", methods=["POST"])
     @requires_signin
-    def update_settings(prop):
+    def api_user_settings(prop):
         user = get_user(session.get("uuid"))
 
         if prop == "password":
@@ -385,7 +388,7 @@ def route(app):
             return errors("Nothing to update", "settings")
 
     @app.route("/api/signout")
-    def signout():
+    def api_signout():
         user = get_user(session["uuid"])
         session.clear()
         logger.info("Logged out {}".format(user))
@@ -399,7 +402,7 @@ def route(app):
     @requires_form_field("message", if_missing="Message missing", redirect_url_for="contact_page",
                          value_pattern=PATTERN_NOT_EMPTY)
     @limiter.limit("5 per day")
-    def contact():
+    def api_send_contact():
         email = request.form.get("email")
         subject = request.form.get("subject", "No Subject")
         msg = request.form.get("message")

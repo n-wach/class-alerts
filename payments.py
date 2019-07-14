@@ -4,7 +4,7 @@ from flask import url_for, redirect, render_template, request, session
 from paypal import PayPalConfig
 from paypal import PayPalInterface
 
-from db import Payment, User, db, get_user
+from db import Payment, db, get_user
 from decorators import requires_paid, requires_signin
 
 import logging
