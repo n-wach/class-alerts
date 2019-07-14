@@ -1,8 +1,12 @@
 {% from "email/email.html" import email_card %}
 {% call email_card(user.email, "Account Activated", "#6a1b9a") %}
   Your <a style="color: rgb(255,82,82);" href="https://classalerts.org">classalerts.org</a> account has been
-  successfully activated for the next <strong>{{ get_user_college(user).renewal_period }}</strong> at <strong>{{ get_user_college(user).name }}</strong>.
+  successfully activated for the next {{ user.get_college().renewal_period }} at {{ user.get_college().name }}.
   <br>
   <br>
-  Thank you for your purchase.
+  Here is your transaction info:<br>
+  <strong>{{ transaction_info }}</strong>
+  <br>
+  <br>
+  Thank you for your purchase, we wish you the best of luck with your class registration.
 {% endcall %}

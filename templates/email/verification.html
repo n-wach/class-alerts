@@ -1,14 +1,14 @@
 {% from "email/email.html" import email_card %}
-{% call email_card(user.email, "Email Verification Code", "#ff9800") %}
-  A <a style="color: rgb(255,82,82);" href="https://classalerts.org">classalerts.org</a> account has just been created
-  with the email <strong>{{ user.email }}</strong>.
+{% call email_card(user.email, "Email Verification", "#ff9800") %}
+  Welcome to <a style="color: rgb(255,82,82);" href="https://classalerts.org">classalerts.org</a>!
   <br>
   <br>
-  If this was you, please open the verification link:
-  <a style="color: rgb(255,82,82);" href="{{ url_for("do_verify", code=user.verify_code, _external=True) }}">
-    {{ url_for("do_verify", code=user.verify_code, _external=True) }}
-  </a>.
+  To finish setting up your account, please click the link below to confirm your email address:
+  <br>
+    <a style="color: rgb(255,82,82);" href="{{ url_for("do_verify", code=user.verify_code, _external=True) }}">
+      Verify Email Address
+    </a>.
   <br>
   <br>
-  If not, don't worry.  We won't be sending you any more mail.
+  Please email us at info@m.classalerts.org if you have any questions or concerns.
 {% endcall %}

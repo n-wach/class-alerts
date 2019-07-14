@@ -7,20 +7,20 @@
   {% call centered_card("PayPal Order Confirmation", "purchase", "orange") %}
     {% if resp["ACK"] == "Success" %}
       Everything looks good! <br>
-      Save the following information: <br>
+      Please save the following information: <br>
       <strong>
         TIME: {{ resp['TIMESTAMP'] }}<br>
-        TOKEN: {{ resp['TOKEN'] }}
-        <br>
-        EMAIL (your Activation Code will be sent here): {{ resp['EMAIL'] }}<br>
+        TOKEN: {{ resp['TOKEN'] }}<br>
+        EMAIL: {{ resp['EMAIL'] }}<br>
         AMOUNT: {{ resp['AMT'] }} {{ resp['CURRENCYCODE'] }}<br>
       </strong>
+      This information will also be sent to your email.
       <br>
       <a href="{{ url_for('paypal_do', token=resp['TOKEN']) }}">Click here to complete the payment.</a>
     {% else %}
       There was an unexpected error while processing your request.<br>
       Error code: <strong>{{ resp["ACK"] }}</strong>
-      Click <a href="{{ url_for('landing_page') }}">here</a> to try again.  Please contact support if the problem
+      Click <a href="{{ url_for('landing_page') }}">here</a> to try again.  Please <a href="{{ url_for('contact') }}">contact support</a> if the problem
       persists.
     {% endif %}
   {% endcall %}

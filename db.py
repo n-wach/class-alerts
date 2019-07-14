@@ -11,12 +11,16 @@ from notifier import send_activation_email, send_deactivation_email, send_passwo
     send_call_open, send_call_remind, \
     send_sms_open, send_sms_remind, send_sms_close
 
+import logging
+
+logger = logging.getLogger("app.db")
+
 db = SQLAlchemy()
 db.session.expire_on_commit = False
 
-ROLE_ADMIN = 0
-ROLE_MARKETER = 1
-ROLE_USER = 2
+ROLE_ADMIN = 10
+ROLE_MARKETER = 100
+ROLE_USER = 200
 
 
 class User(db.Model):
@@ -58,10 +62,12 @@ class User(db.Model):
         self.set_password(raw_password, email=False)
         self.college = ""
         self.registered_at = datetime.now()
+        logger.info("Created {}".format(self))
 
     def delete(self):
         for r in self.get_requests():
             r.delete()
+        logger.info("Deleted {}".format(self))
         db.session.delete(self)
         db.session.commit()
 
@@ -132,13 +138,15 @@ class PasswordResetRequest(db.Model):
         self.user_uuid = user_uuid
         self.created_at = datetime.now()
         self.used = False
+        logger.info("Created {}".format(self))
 
     def attempt_use(self, new_password):
         if self.used:
-            print("used")
+            logger.info("Attempted to reuse {}".format(self))
             return False
-        if (datetime.now() - self.created_at).total_seconds() > 600:
-            print("expired")
+        age = (datetime.now() - self.created_at).total_seconds()
+        if age > 600:
+            logger.info("Attempted to use {}, expired by {} seconds".format(self, age - 600))
             return False
         user = User.query.filter_by(uuid=self.user_uuid).first()
         if user:
@@ -146,10 +154,15 @@ class PasswordResetRequest(db.Model):
             self.used_at = datetime.now()
             self.used = True
             db.session.commit()
-            print("valid")
+            logger.info("{} used {}").format(user, self)
             return True
-        print("no user")
-        return False
+        else:
+            logger.info("Attempted to use {}, which did not have a corresponding user").format(self)
+            return False
+
+    def __str__(self):
+        user = User.query.filter_by(uuid=self.user_uuid).first()
+        return "<PasswordResetRequest for {}>".format(user)
 
 
 class FreePaymentCode(db.Model):
@@ -167,8 +180,10 @@ class FreePaymentCode(db.Model):
         self.creator_uuid = creator.uuid
         self.created_at = datetime.now()
         self.is_used = False
+        logger.info("{} created {}".format(creator, self))
 
     def delete(self):
+        logger.info("{} deleted").format(self)
         db.session.delete(self)
         db.session.commit()
 
@@ -180,13 +195,20 @@ class FreePaymentCode(db.Model):
 
     def use(self, user):
         if self.is_used:
-            return
-        self.used_by_uuid = user.uuid
-        user.is_paid = True
-        self.is_used = True
-        self.used_on = datetime.now()
-        send_activation_email(user)
-        db.session.commit()
+            logger.info("Attempt to reuse {} by {}".format(self, user))
+            return False
+        else:
+            self.used_by_uuid = user.uuid
+            user.is_paid = True
+            self.is_used = True
+            self.used_on = datetime.now()
+            transaction_info = "Used Free Payment Code '{}'<br>\n" \
+                               "TIME: {}<br>\n".format(self.code,
+                                                       self.used_on)
+            send_activation_email(user, transaction_info)
+            logger.info("{} used by {}".format(self, user))
+            db.session.commit()
+            return True
 
     def __str__(self):
         return "<FreePaymentCode '{}'>".format(self.code)
@@ -200,28 +222,36 @@ class Payment(db.Model):
     is_complete = db.Column(db.Boolean)
     completed_at = db.Column(db.DateTime)
     started_at = db.Column(db.DateTime)
-    purchaser_email = db.Column(db.String(100))  # assigned based on email of token using get_express_checkout_details
 
     def __init__(self, token, user):
         self.token = token
         self.account_uuid = user.uuid
         self.is_complete = False
         self.started_at = datetime.now()
+        logger.info("Created {}".format(self))
 
-    def process(self):
+    def process(self, transaction_info):
         if self.is_complete:
-            return
-        user = User.query.filter_by(uuid=self.account_uuid).first()
-        user.is_paid = True
-        send_activation_email(user)
-        self.is_complete = True
-        self.completed_at = datetime.now()
+            return False
+        else:
+            user = User.query.filter_by(uuid=self.account_uuid).first()
+            user.is_paid = True
+            send_activation_email(user, transaction_info)
+            self.is_complete = True
+            self.completed_at = datetime.now()
+            return True
 
     def delete(self):
         if self.is_complete:
-            return
-        db.session.delete(self)
-        db.session.commit()
+            return False
+        else:
+            db.session.delete(self)
+            db.session.commit()
+            return True
+
+    def __str__(self):
+        user = User.query.filter_by(uuid=self.account_uuid).first()
+        return "<Payment for {} ({})>".format(user, self.token)
 
 
 class ClassRequest(db.Model):
@@ -239,9 +269,10 @@ class ClassRequest(db.Model):
         self.monitor_uuid = monitor.uuid
         self.notifications_sent = 0
         self.last_notified = datetime.now()
+        logger.info("Created new {}".format(self))
 
     def update(self):
-        print("Updating", self)
+        logger.debug("Updating {}".format(self))
         delay_notify = datetime.now() - self.last_notified
         monitor = self.get_monitor()
         if monitor.has_availability:
@@ -258,6 +289,7 @@ class ClassRequest(db.Model):
         else:
             if self.notifications_sent > 0:
                 user = self.get_requester()
+                user.attempt_notify("close", monitor)
             self.notifications_sent = 0
 
     def get_monitor(self):
@@ -267,7 +299,9 @@ class ClassRequest(db.Model):
         return User.query.filter_by(uuid=self.requester_uuid).first()
 
     def delete(self):
+        logger.info("Deleting {}".format(self))
         if len(ClassRequest.query.filter_by(monitor_uuid=self.monitor_uuid).all()) == 1:
+            logger.info("Only request for {}, deleting monitor too.".format(self.get_monitor()))
             self.get_monitor().delete()  # delete the class if this is the only request for it
         db.session.delete(self)
         db.session.commit()
@@ -291,6 +325,7 @@ class ClassMonitor(db.Model):
         self.class_instance = class_instance
         self.has_availability = False
         self.last_checked = datetime.now()
+        logger.info("Created {}".format(self))
 
     @staticmethod
     def update_with_context(mon, app):
@@ -298,7 +333,7 @@ class ClassMonitor(db.Model):
             mon.update()
 
     def update(self):
-        # print("Updating", self)
+        logger.debug("Updating {}".format(self))
         cl = self.class_instance
         self.has_availability = cl.update_status()
         self.class_instance = cl
@@ -310,6 +345,7 @@ class ClassMonitor(db.Model):
         db.session.commit()
 
     def delete(self):
+        logger.info("Deleting {}".format(self))
         db.session.delete(self)
         db.session.commit()
 
@@ -322,6 +358,8 @@ def update_all(app):
         start = time.time()
         class_monitors = ClassMonitor.query.all()
 
+        logger.debug("Updating {} monitors".format(len(class_monitors)))
+
         threads = (threading.Thread(target=ClassMonitor.update_with_context, args=(monitor, app)) for monitor in
                    class_monitors)
 
@@ -331,17 +369,10 @@ def update_all(app):
         for thread in threads:
             thread.join()
 
-        # print("Updated {} listings in {} seconds".format(len(class_monitors), time.time() - start))
-    except Exception as e:
-        print(str(e))
+        logger.debug("Updated {} listings in {} seconds".format(len(class_monitors), time.time() - start))
 
-
-def attempt_get_user(email, password):
-    user = User.query.filter_by(email=email).first()
-    if user is None:
-        return None
-    if user.verify_password(password):
-        return user
+    except Exception:
+        logger.exception("Error updating class monitors")
 
 
 def get_user(u):

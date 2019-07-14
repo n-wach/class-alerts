@@ -12,42 +12,47 @@ from db import db, User, update_all, FreePaymentCode
 from notifier import prepare_templates
 from colleges import colleges
 
-print("Setting up...")
+import logging
+
+
+logger = logging.getLogger("app")
+
+logger.info("Setting up...")
 app = Flask(__name__,
             static_url_path='',
             static_folder='static')
 
 
-print("Configuring...")
+logger.info("Configuring...")
 app.secret_key = os.environ.get("SECRET_KEY")
 
 
-print("Defining Constants...")
+logger.info("Defining Constants...")
 MAX_USER_REQUESTS = 15
 DEV_GEN = True
 
 
-print("Routing pages...")
+logger.info("Routing pages...")
 import pages
 pages.route(app)
 
 
-print("Routing api")
+logger.info("Routing api")
 import api
 api.route(app)
 
 
-print("Adding Voice endpoints")
+logger.info("Adding Voice endpoints")
 import voice
 voice.route(app)
 
 
-print("Preparing PayPal service handlers")
+logger.info("Preparing PayPal service handlers")
 import payments
 payments.route(app)
 
 
-print("Adding CSRF Request Handlers")
+logger.info("Adding CSRF Request Handlers")
 
 
 @app.before_request
@@ -56,8 +61,8 @@ def csrf_protect():
         token = session.get('csrf_token', None)
         sent = request.form.get('csrf_token')
         if not token or token != sent:
-            abort(403,
-                  "Invalid CSRF Token: {} should have been {}.  Try refreshing the previous page.".format(sent, token))
+            logger.debug("Invalid CSRF Token: {} should have been {}".format(sent, token))
+            abort(403, "Invalid CSRF Token.  Try refreshing the previous page.")
 
 
 @app.after_request
@@ -65,17 +70,22 @@ def csrf_pop(response):
     if request.method == "POST":
         if 200 <= response.status_code < 400:
             session.pop('csrf_token', None)
+            logger.debug("Consuming CSRF token")
     return response
 
 
-def get_new_csrf_token():
-    token = str(uuid.uuid4())
-    session["csrf_token"] = token
-    return token
-
-
-print("Defining Jinja Globals...")
+logger.info("Defining Jinja Globals...")
 with app.app_context():
+    def get_new_csrf_token():
+        token = str(uuid.uuid4())
+        session["csrf_token"] = token
+        logger.debug("Generating new CSRF token")
+        return token
+
+
+    def get_all_codes():
+        return FreePaymentCode.query.all()
+
     def current_user():
         if "uuid" in session:
             return User.query.filter_by(uuid=session["uuid"]).first()
@@ -102,11 +112,11 @@ with app.app_context():
                                  time=time)
 
 
-print("Loading Notifier templates")
+logger.info("Loading Notifier templates")
 prepare_templates(app)
 
 
-print("Creating Database Manager")
+logger.info("Creating Database Manager")
 if not os.getcwd().endswith("Alerts"):
     raise EnvironmentError("Working directory must be /Alerts.  Alerts.db is expected in the working directory")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.getcwd() + '/Alerts.db'
@@ -114,7 +124,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 
-print("Creating Scheduler...")
+logger.info("Creating Scheduler...")
 
 
 def background_monitor():
@@ -138,8 +148,8 @@ scheduler.start()
 
 if DEV_GEN:
     with app.app_context():
-        print("Generating DB")
+        logger.warning("Generating DB")
         db.create_all()
-        print("Done!")
 
-print("Starting...")
+
+logger.info("Starting...")
