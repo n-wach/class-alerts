@@ -9,10 +9,11 @@
 {% block body %}
   {% call settings_card("Delete Your Account") %}
     {{ csrf_token() }}
-    {% call make_form(url_for("settings", prop="delete"), error) %}
-      <span class="error">Warning! There is no confirmation after you click this button.
-        One click and your account and all relevant information will be permanently deleted from our system. You must
-        contact us for a new one.</span>
+    {% call make_form(url_for("api_user_settings", prop="delete"), error) %}
+      <h5 class="error" style="text-align: center">Warning!</h5>
+      <p>After you click this button, there's no turning back.
+        If you delete your account by mistake, you'll have to contact us for a new one.
+      </p>
       {{ make_button("Permanently Delete My Account") }}
     {% endcall %}
   {% endcall %}

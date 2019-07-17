@@ -1,7 +1,6 @@
 {% extends "utility/layout.html" %}
 {% from "utility/forms.html" import csrf_token, make_button %}
 {% macro user_row(u) %}
-
   <tr>
     <td class="mdl-data-table__cell--non-numeric">{{ u.get_status() }}</td>
     <td class="mdl-data-table__cell--non-numeric"><strong>
@@ -53,7 +52,7 @@
       <div class="mdl-layout-spacer"></div>
       <div id="view-accounts" class="mdl-card mdl-cell mdl-cell--11-col mdl-shadow--2dp mdl-cell">
         <div class="mdl-card__title mdl-color--orange">
-          <h2 class="mdl-card__title-text">All Accounts</h2>
+          <h2 class="mdl-card__title-text">Accounts Visible to You</h2>
         </div>
         <table style="display: inline-block; overflow-x: auto; white-space: nowrap;"
                class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
@@ -69,8 +68,8 @@
           </tr>
           </thead>
           <tbody>
-          {% for user in get_all_users() %}
-            {{ user_row(user) }}
+          {% for u in user.get_visible_users() %}
+            {{ user_row(u) }}
           {% endfor %}
           </tbody>
         </table>

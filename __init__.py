@@ -24,4 +24,4 @@ if __name__ == "__main__":
 
     logger.info("Running app...")
 
-    app.run(debug=False, use_reloader=False)
+    app.run(debug=True, use_reloader=False)

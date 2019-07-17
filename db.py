@@ -62,12 +62,12 @@ class User(db.Model):
         self.set_password(raw_password, email=False)
         self.college = ""
         self.registered_at = datetime.now()
-        logger.info("Created {}".format(self))
+        logger.debug("Created {}".format(self))
 
     def delete(self):
         for r in self.get_requests():
             r.delete()
-        logger.info("Deleted {}".format(self))
+        logger.debug("Deleted {}".format(self))
         db.session.delete(self)
         db.session.commit()
 
@@ -121,6 +121,18 @@ class User(db.Model):
     def get_college(self):
         return get_user_college(self)
 
+    def get_visible_users(self):
+        if self.role <= ROLE_ADMIN:
+            return User.query.all()
+        else:
+            return [self]
+
+    def get_visible_codes(self):
+        if self.role <= ROLE_ADMIN:
+            return FreePaymentCode.query.all()
+        else:
+            return FreePaymentCode.query.filter_by(creator_uuid=self.uuid).all()
+
     def __str__(self):
         return "<{}>".format(self.get_friendly_name())
 
@@ -139,7 +151,7 @@ class PasswordResetRequest(db.Model):
         self.user_uuid = user_uuid
         self.created_at = datetime.now()
         self.used = False
-        logger.info("Created {}".format(self))
+        logger.debug("Created {}".format(self))
 
     def attempt_use(self, new_password):
         if self.used:
@@ -185,10 +197,10 @@ class FreePaymentCode(db.Model):
         self.creator_uuid = creator.uuid
         self.created_at = datetime.now()
         self.is_used = False
-        logger.info("{} created {}".format(creator, self))
+        logger.debug("{} created {}".format(creator, self))
 
     def delete(self):
-        logger.info("{} deleted").format(self)
+        logger.debug("{} deleted".format(self))
         db.session.delete(self)
         db.session.commit()
 
@@ -237,8 +249,10 @@ class Payment(db.Model):
 
     def process(self, transaction_info):
         if self.is_complete:
+            logger.info("Attempt to reprocess {}".format(self))
             return False
         else:
+            logger.info("Processed {}".format(self))
             user = User.query.filter_by(uuid=self.account_uuid).first()
             user.is_paid = True
             send_activation_email(user, transaction_info)
@@ -248,10 +262,12 @@ class Payment(db.Model):
 
     def delete(self):
         if self.is_complete:
+            logger.info("Attempt to cancel completed {}".format(self))
             return False
         else:
             db.session.delete(self)
             db.session.commit()
+            logger.info("Deleted {}".format(self))
             return True
 
     def __str__(self):
@@ -274,7 +290,7 @@ class ClassRequest(db.Model):
         self.monitor_uuid = monitor.uuid
         self.notifications_sent = 0
         self.last_notified = datetime.now()
-        logger.info("Created new {}".format(self))
+        logger.debug("Created {}".format(self))
 
     def update(self):
         logger.debug("Updating {}".format(self))
@@ -306,8 +322,9 @@ class ClassRequest(db.Model):
     def delete(self):
         logger.info("Deleting {}".format(self))
         if len(ClassRequest.query.filter_by(monitor_uuid=self.monitor_uuid).all()) == 1:
-            logger.info("Only request for {}, deleting monitor too.".format(self.get_monitor()))
-            self.get_monitor().delete()  # delete the class if this is the only request for it
+            monitor = self.get_monitor()
+            logger.info("Only one request for {}, deleting monitor too.".format(monitor))
+            monitor.delete()  # delete the class if this is the only request for it
         db.session.delete(self)
         db.session.commit()
 
@@ -330,7 +347,7 @@ class ClassMonitor(db.Model):
         self.class_instance = class_instance
         self.has_availability = False
         self.last_checked = datetime.now()
-        logger.info("Created {}".format(self))
+        logger.debug("Created {}".format(self))
 
     @staticmethod
     def update_with_context(mon, app):
@@ -350,7 +367,7 @@ class ClassMonitor(db.Model):
         db.session.commit()
 
     def delete(self):
-        logger.info("Deleting {}".format(self))
+        logger.debug("Deleting {}".format(self))
         db.session.delete(self)
         db.session.commit()
 
