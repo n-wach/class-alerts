@@ -7,6 +7,7 @@
 {% block body %}
   {% call centered_card("Contact", "contact", "blue-grey") %}
     {% call make_form(url_for("api_send_contact"), error) %}
+      If you have any questions, comments, or concerns, don't hesitate to contact us!
       Please include your email so we can respond to your message.
       {% if user %}
         {{ make_input_field("email", "email", "Your Email", required=True, value=user.email) }}
@@ -14,11 +15,11 @@
         {{ make_input_field("email", "email", "Your Email", required=True) }}
       {% endif %}
       {% if college_request %}
-        {{ make_input_field("text", "subject", "Message Subject", value="College Add Request") }}
+        {{ make_input_field("text", "subject", "Subject", value="College Add Request") }}
         {{ make_input_field("multiline", "message", "Message", required=True,
            value="Please provide information on your college, including its name and website, and we'll add it as soon as possible.") }}
       {% else %}
-        {{ make_input_field("text", "subject", "Message Subject") }}
+        {{ make_input_field("text", "subject", "Subject") }}
         {{ make_input_field("multiline", "message", "Message", required=True) }}
       {% endif %}
       {{ make_button("Send Message") }}

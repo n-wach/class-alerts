@@ -36,7 +36,7 @@
   <header class="header mdl-layout__header">
     {% if not user %}
       <a href="{{ url_for('landing_page') }}">
-        <img class="nav-icon" src="favicon/favicon-background.png" alt="logo"/>
+        <img class="nav-icon" src="{{ url_for("static", filename="favicon/favicon-background.png") }}" alt="logo"/>
       </a>
     {% endif %}
     <div class="mdl-layout__header-row">
@@ -47,7 +47,7 @@
           <a class="mdl-navigation__link" href="{{ url_for('signup') }}">Sign Up</a>
           <a class="mdl-navigation__link" href="{{ url_for('signin') }}">Sign In</a>
         {% else %}
-          <a class="mdl-navigation__link" href="{{ url_for('signout') }}">Sign Out</a>
+          <a class="mdl-navigation__link" href="{{ url_for('api_signout') }}">Sign Out</a>
         {% endif %}
       </nav>
     </div>
@@ -65,7 +65,7 @@
           Home
         </a>
         {% if user.is_paid %}
-          <a class="mdl-navigation__link" href="{{ url_for('add') }}">
+          <a class="mdl-navigation__link" href="{{ url_for('class_add') }}">
             <i class="mdl-color-text--blue-grey-400 material-icons">add</i>
             Add Class
           </a>
@@ -75,7 +75,7 @@
             Activate Your Account
           </a>
         {% endif %}
-        <a class="mdl-navigation__link" href="{{ url_for('signout') }}">
+        <a class="mdl-navigation__link" href="{{ url_for('api_signout') }}">
           <i class="mdl-color-text--blue-grey-400 material-icons">exit_to_app</i>
           Sign Out
         </a>

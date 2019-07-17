@@ -113,6 +113,7 @@ class User(db.Model):
                 return "Paid User"
             else:
                 return "Unpaid User"
+        return "Unknown Role {}".format(self.role)
 
     def get_friendly_name(self):
         return "{}: {}".format(self.get_status(), self.email)
@@ -144,8 +145,8 @@ class PasswordResetRequest(db.Model):
         if self.used:
             logger.info("Attempted to reuse {}".format(self))
             return False
-        age = (datetime.now() - self.created_at).total_seconds()
-        if age > 600:
+        if self.is_expired():
+            age = (datetime.now() - self.created_at).total_seconds()
             logger.info("Attempted to use {}, expired by {} seconds".format(self, age - 600))
             return False
         user = User.query.filter_by(uuid=self.user_uuid).first()
@@ -154,11 +155,15 @@ class PasswordResetRequest(db.Model):
             self.used_at = datetime.now()
             self.used = True
             db.session.commit()
-            logger.info("{} used {}").format(user, self)
+            logger.info("{} used {}".format(user, self))
             return True
         else:
             logger.info("Attempted to use {}, which did not have a corresponding user").format(self)
             return False
+
+    def is_expired(self):
+        age = (datetime.now() - self.created_at).total_seconds()
+        return age > 600
 
     def __str__(self):
         user = User.query.filter_by(uuid=self.user_uuid).first()

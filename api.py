@@ -1,3 +1,4 @@
+import random
 from time import sleep
 
 from flask import session, request, url_for, redirect, abort, render_template
@@ -46,7 +47,7 @@ def route(app):
                          value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
     @requires_form_field("confirm", if_missing="Password confirmation missing", redirect_url_for="signup",
                          value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
-    @requires_form_field("agree", if_missing="Terms and Policy agreement missing", redirect_url_for="signup",
+    @requires_form_field("agree", if_missing="Please read and agree to our Terms of Service and Privacy Policy", redirect_url_for="signup",
                          value_pattern=PATTERN_TRUE, repopulate=False)
     @limiter.limit("5 per day")
     def api_signup():
@@ -57,13 +58,13 @@ def route(app):
         match = User.query.filter_by(email=create_email).first()
 
         if match is not None:
-            return errors("This email is already in use.  Please use a different one or sign in.", "signup")
+            return errors("This email is already in use.  Please use a different one or sign in", "signup")
         elif len(create_pw) < 6:
-            return errors("Password must be at least 6 characters long.", "signup")
+            return errors("Password must be at least 6 characters long", "signup")
         elif create_pw != confirm_pw:
-            return errors("Passwords do not match.", "signup")
+            return errors("Passwords do not match", "signup")
         elif create_phone != "" and (len(create_phone) != 11 or not PATTERN_PHONE.match(create_phone)):
-            return errors("Invalid phone number format.", "signup")
+            return errors("Invalid phone number format", "signup")
 
         user = User("root", create_email, create_phone, create_pw)
         session["uuid"] = user.uuid
@@ -139,10 +140,11 @@ def route(app):
 
             if len(ClassRequest.query.filter_by(monitor_uuid=class_monitor.uuid, requester_uuid=user.uuid).all()) > 0:
                 logger.info("Duplicate add request for {} by {}".format(class_monitor, user))
-                return errors("You've already added this class!", "class_add")
+                return errors("You've already added this class", "class_add")
             elif len(user.get_requests()) >= MAX_USER_REQUESTS:
                 logger.info("Attempt to request more than {} classes by {}".format(MAX_USER_REQUESTS, user))
-                return errors("You can't request more than {} classes at a time.".format(MAX_USER_REQUESTS), "class_add")
+                return errors("By default, you can't monitor more than {} classes at a time.  Please contact support "
+                              "if you need more".format(MAX_USER_REQUESTS), "class_add")
             else:
                 req = ClassRequest(user, class_monitor)
                 db.session.add(req)
@@ -174,19 +176,19 @@ def route(app):
                          value_pattern=PATTERN_MASS_MESSAGE, if_invalid="Message too short!")
     @limiter.limit("5 per hour")
     def api_admin_message():
-        raise NotImplementedError("Message function temporarily disabled")
+        return errors("Message function disabled", "admin_message")
 
     @app.route("/api/admin/generate-free-code", methods=["POST"])
     @requires_role(ROLE_MARKETER)
     @requires_form_field("code", if_missing="Missing code", redirect_url_for="admin_codes_view",
                          value_pattern=PATTERN_CODE,
-                         if_invalid="Codes must be at least 5 characters (letters and numbers only)")
+                         if_invalid="Codes are at least 5 characters, using letters and numbers only")
     def api_admin_codes_generate():
         user = get_user(session["uuid"])
         code = request.form.get("code").lower()
         if len(FreePaymentCode.query.filter_by(code=code).all()) > 0:
             logging.info("{} tried to generate existing code '{}'".format(user, code))
-            return errors("Code has already been generated.", "admin_codes_view")
+            return errors("Code has already been generated", "admin_codes_view")
         else:
             p = FreePaymentCode(code, user)
             logger.info("{} generated code {}".format(user, p))
@@ -197,18 +199,18 @@ def route(app):
     @app.route("/api/admin/delete-free-code", methods=["POST"])
     @requires_role(ROLE_MARKETER)
     @requires_form_field("delete-code", if_missing="Missing code", redirect_url_for="admin_codes_view",
-                         value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
+                         value_pattern=PATTERN_CODE, if_invalid="Codes are at least 5 characters, using letters and numbers only")
     def api_admin_codes_delete():
         user = get_user(session["uuid"])
         code = request.form.get("delete-code").lower()
         if len(FreePaymentCode.query.filter_by(code=code).all()) == 0:
             logger.info("{} tried deleting non-existent code '{}'".format(user, code))
-            return errors("Code does not exist.", "admin_codes_view")
+            return errors("Code does not exist", "admin_codes_view")
         else:
             fpc = FreePaymentCode.query.filter_by(code=code).first()
             if fpc.is_used:
                 logger.info("{} tried deleting consumed code '{}'".format(user, code))
-                return errors("Code has already been used, and cannot be deleted.", "admin_codes_view")
+                return errors("Code has already been used, and cannot be deleted", "admin_codes_view")
             else:
                 logger.info("{} deleted {}".format(user, fpc))
                 fpc.delete()
@@ -218,7 +220,7 @@ def route(app):
     @app.route("/api/user/use-free-code", methods=["POST"])
     @requires_paid(paid=False)
     @requires_form_field("code", if_missing="Missing code", redirect_url_for="activate",
-                         value_pattern=PATTERN_CODE, if_invalid="Codes must be at least 5 characters (letters and numbers only)")
+                         value_pattern=PATTERN_CODE, if_invalid="Codes are at least 5 characters, using letters and numbers only")
     @limiter.limit("20 per day")
     def api_codes_use():
         user = get_user(session["uuid"])
@@ -258,15 +260,22 @@ def route(app):
         email = request.form.get("email").lower()
         user = User.query.filter_by(email=email).first()
         if user:
-            prr = PasswordResetRequest(user.uuid)
-            db.session.add(prr)
-            db.session.commit()
-            logger.info("Someone requested password reset for {}".format(user))
-            send_password_reset_email(user, prr)
+            recent = PasswordResetRequest.query.filter_by(user_uuid=user.uuid).order_by(PasswordResetRequest.created_at)[-1]
+            if recent and not recent.is_expired():
+                logger.info("Someone requested password reset for {}, which has recent {}".format(user, recent))
+                sleep(random.random() + 0.2)
+            else:
+                prr = PasswordResetRequest(user.uuid)
+                db.session.add(prr)
+                db.session.commit()
+                logger.info("Someone requested password reset for {}".format(user))
+                send_password_reset_email(user, prr)
+                sleep(random.random())
         else:
             logger.info("Someone requested password reset for email {}, which does not exist".format(email))
-            sleep(1)
-        return render_template("public/forgot-response.html", forgot_email=email)
+            sleep(random.random() + 0.2)
+        session["forgot-password-email"] = email
+        return redirect(url_for("forgot_password"))
 
     @app.route("/api/user/reset-password/<reset_uuid>", methods=["POST"])
     @limiter.limit("5 per hour")
@@ -324,7 +333,7 @@ def route(app):
             return errors("Your account has been deleted", "signup")
         else:
             logger.info("{} failed to delete their account".format(user))
-            abort(400, "Something went wrong.")
+            abort(400, "Something went wrong.  Please contact support")
 
     @app.route("/api/user/settings/<prop>", methods=["POST"])
     @requires_signin

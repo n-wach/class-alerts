@@ -74,7 +74,12 @@ def route(app):
     @app.route("/forgot-password", methods=["GET"])
     @displays_error
     def forgot_password(error):
-        return render_template("public/forgot.html", error=error)
+        e = session.get("forgot-password-email", None)
+        if e:
+            session["forgot-password-email"] = None
+            return render_template("public/forgot-response.html", forgot_email=e)
+        else:
+            return render_template("public/forgot.html", error=error)
 
     @app.route("/reset-password/<reset_uuid>", methods=["GET"])
     @displays_error

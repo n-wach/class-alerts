@@ -1,13 +1,12 @@
 import os
-import smtplib
-# from urllib import quote_plus
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 import requests
 from datetime import datetime
 from flask import url_for
 from twilio.rest import Client
+
+import logging
+logger = logging.getLogger("app.notifier")
 
 twilio_sid = os.environ.get("TWILIO_SID")
 twilio_auth = os.environ.get("TWILIO_AUTH")
@@ -49,19 +48,17 @@ def prepare_templates(app):
 
 
 def send_sms(raw_phone, message):
-    try:
-        if len(str(raw_phone)) != 11:
-            return None
-        if USE_TWILIO:
-            client.messages.create(
-                to="+" + str(raw_phone),
-                body=message,
-                from_=twilio_sender)
-            print("Message sent to " + str(raw_phone))
-        else:
-            print("Pretend a message was sent to " + str(raw_phone))
-    except:
-        print("Exception on SMS to '{}'".format(raw_phone))
+    if len(str(raw_phone)) != 11:
+        logger.info("Failed to send SMS to '{}'".format(raw_phone))
+        return
+    if USE_TWILIO:
+        client.messages.create(
+            to="+" + str(raw_phone),
+            body=message,
+            from_=twilio_sender)
+        logger.info("Message sent to {}".format(raw_phone))
+    else:
+        logger.info("Pretend a message was sent to {}".format(raw_phone))
 
 
 def send_sms_open(user, monitor):
@@ -87,15 +84,16 @@ def send_sms_close(user, monitor):
 
 def send_call(raw_phone, url):
     if len(str(raw_phone)) != 11:
-        return None
+        logger.info("Failed to send call to '{}'".format(raw_phone))
+        return
     if USE_TWILIO:
         client.calls.create(
             to="+" + str(raw_phone),
             from_=twilio_sender,
             url=url)
-        print("Message sent to " + str(raw_phone))
+        logger.info("Call sent to {}".format(raw_phone))
     else:
-        print("Pretend a call was sent to " + str(raw_phone))
+        logger.info("Pretend a call was sent to {}".format(raw_phone))
 
 
 def send_call_open(user, monitor):

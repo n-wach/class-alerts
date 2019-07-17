@@ -33,7 +33,6 @@ def requires_signin(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if "uuid" not in session:
-
             return redirect(url_for("signin"))
         else:
             user = get_user(session["uuid"])
@@ -42,7 +41,6 @@ def requires_signin(f):
             else:
                 session.clear()
                 return redirect(url_for("signin"))
-
     return wrapper
 
 
@@ -91,9 +89,7 @@ def requires_form_field(name, if_missing, redirect_url_for=None, value_pattern=N
             else:
                 # call
                 return f(*args, **kwargs)
-
         return wrapper
-
     return decorator
 
 
@@ -103,7 +99,6 @@ def displays_error(f):
         error = session.get("display_error")
         session["display_error"] = ""
         return f(*args, **kwargs, error=error)
-
     return wrapper
 
 
@@ -116,9 +111,7 @@ def requires_verified(verified=True):
                 return f(*args, **kwargs)
             else:
                 return abort(404)
-
         return wrapper
-
     return decorator
 
 
@@ -131,7 +124,5 @@ def requires_paid(paid=True):
                 return f(*args, **kwargs)
             else:
                 return abort(404)
-
         return wrapper
-
     return decorator
