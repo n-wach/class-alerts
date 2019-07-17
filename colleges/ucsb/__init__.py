@@ -11,7 +11,7 @@ from colleges.generic import College
 class UCSB(College):
     short_name = "UCSB"
     name = "University of California Santa Barbara"
-    icon = "images/ucsb.jpg"
+    icon = "images/ucsb.png"
 
     years = ["2019"]
     term_names = ["Spring", "Fall"]

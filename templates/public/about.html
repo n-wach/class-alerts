@@ -119,15 +119,7 @@
           </p>
         </div>
         <h2>Over {{ (colleges|length - 1) }} Colleges Supported!</h2>
-        <div class="mdl-grid">
-          <div class="mdl-layout-spacer"></div>
-          {% for college in colleges %}
-            <div class="mdl-cell mdl-cell--2-col">
-              <img class="college-icon" src="{{ url_for('static', filename=college.icon) }}" alt="{{ college.name }}"/>
-            </div>
-          {% endfor %}
-          <div class="mdl-layout-spacer"></div>
-        </div>
+        <div class="college-banner"></div>
         <h2>Pricing</h2>
         <div class="mdl-grid">
           <p class="mdl-cell--12-col">
@@ -164,7 +156,7 @@
             </li>
             <li class="mdl-list__item mdl-list__item--three-line">
               <span class="mdl-list__item-primary-content">
-                <img class="mdl-list__item-avatar" src="{{ url_for('static', filename="images/columbia.jpg") }}" alt="Columbia University">
+                <img class="mdl-list__item-avatar" src="{{ url_for('static', filename="images/columbia.png") }}" alt="Columbia University">
                 <span>Jacob Kim-Sherman - Columbia University</span>
                 <span class="mdl-list__item-text-body">
                   Class Alerts really took the stress out

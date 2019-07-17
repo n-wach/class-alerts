@@ -191,6 +191,26 @@ header a {
     text-decoration: none;
 }
 
+.college-banner {
+    background-image: url("/images/banner.png");
+    background-repeat: repeat-x;
+    background-origin: content-box;
+    height: 200px;
+    width: calc(200% + 1200px);
+    position: relative;
+    left: -100%;
+    padding-left: 0;
+    animation-name: banner-crawl;
+    animation-duration: 60s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes banner-crawl {
+    from {padding-left: 0}
+    to {padding-left: 1200px}
+}
+
 .error {
     color: red;
     margin: 10px 20px;
