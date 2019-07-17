@@ -12,7 +12,7 @@ from app import MAX_USER_REQUESTS
 from colleges import college_short_names, get_user_college
 from decorators import requires_signin, requires_form_field, PATTERN_NOT_EMPTY, errors, PATTERN_PHONE, \
     requires_verified, PATTERN_UUID, requires_paid, PATTERN_MASS_MESSAGE, requires_role, PATTERN_EMAIL, PATTERN_CODE, \
-    PATTERN_PASSWORD, PATTERN_TRUE
+    PATTERN_PASSWORD, PATTERN_ON
 
 import logging
 logger = logging.getLogger("app.api")
@@ -48,7 +48,7 @@ def route(app):
     @requires_form_field("confirm", if_missing="Password confirmation missing", redirect_url_for="signup",
                          value_pattern=PATTERN_NOT_EMPTY, repopulate=False)
     @requires_form_field("agree", if_missing="Please read and agree to our Terms of Service and Privacy Policy", redirect_url_for="signup",
-                         value_pattern=PATTERN_TRUE, repopulate=False)
+                         value_pattern=PATTERN_ON, repopulate=False)
     @limiter.limit("5 per day")
     def api_signup():
         create_email = request.form.get("email").lower()

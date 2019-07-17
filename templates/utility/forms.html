@@ -32,7 +32,7 @@
 {% macro make_checkbox(internal_name, label, checked=False, disabled=False, tooltip=None, size=3) %}
   <div class="mdl-layout-spacer"></div>
   <label class="mdl-cell--{{ size }}-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" id="{{ internal_name }}_label" for="{{ internal_name }}">
-    <input type="checkbox" id="{{ internal_name }}" name="{{ internal_name }}" class="mdl-checkbox__input"
+    <input type="checkbox" id="{{ internal_name }}" name="{{ internal_name }}" value="on" class="mdl-checkbox__input"
       {% if checked %} checked {% endif %}
       {% if disabled %} disabled {% endif %}>
     <span class="mdl-checkbox__label">{{ label|safe }}</span>
