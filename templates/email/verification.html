@@ -5,7 +5,7 @@
   <br>
   To finish setting up your account, please click the link below to confirm your email address:
   <br>
-    <a style="color: rgb(255,82,82);" href="{{ url_for("do_verify", code=user.verify_code, _external=True) }}">
+    <a style="color: rgb(255,82,82);" href="{{ url_for("api_verify_email", code=user.verify_code, _external=True) }}">
       Verify Email Address
     </a>.
   <br>

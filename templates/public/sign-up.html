@@ -10,7 +10,6 @@
       {{ make_input_field("email", "email", "Email", required=True) }}
       {{ make_input_field("password", "password", "Password", ".{6,}", "Password must be at least 6 characters", required=False) }}
       {{ make_input_field("password", "confirm", "Confirm Password", ".{6,}", "Password must be at least 6 characters", required=True) }}
-      {{ make_input_field("text", "phone", "Phone Number (not required, can be changed later)", "[0-9]{11}", "Format: <code>14567890123</code>") }}
       <div class="mdl-grid">
         <div class="mdl-layout-spacer"></div>
           {{ make_checkbox("agree", "I have read and agree to the <a href='" + url_for("terms_page") + "'>Terms of Service</a> and <a href='" + url_for("privacy_page") + "'>Privacy Policy</a>", size=12) }}

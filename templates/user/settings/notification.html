@@ -9,31 +9,29 @@
 {% block body %}
   {% call settings_card("Change Notification Settings") %}
     {{ csrf_token() }}
-    {% call make_form(url_for("settings", prop="notification"), error) %}
+    {% call make_form(url_for("api_user_settings", prop="notification"), error) %}
       <p>If you want to be notified with text messages and phone calls, please provide your phone number.</p>
-      {{ make_input_field("text", "phone", "Phone Number", "[0-9]{11}", "Format: <code>14567890123</code>", value=user.phone) }}
+      {{ make_input_field("text", "phone", "Phone Number", "[0-9]{11}", "<code>+1(456)789-0123</code> should be input as <code>14567890123</code>", value=user.phone) }}
       {% set no_phone = (user.phone == "") %}
       <p>When a class becomes available, send me:</p>
       <div class="mdl-grid">
         {{ make_checkbox("a_email", "Email", checked=True, disabled=True, tooltip="Email always enabled") }}
-        {{ make_checkbox("a_sms", "SMS Text", checked=user.available_sms, disabled=no_phone) }}
-        {{ make_checkbox("a_call", "Phone Call", checked=user.available_call, disabled=no_phone) }}
+        {{ make_checkbox("a_sms", "SMS Text", checked=user.available_sms and not no_phone, disabled=no_phone,tooltip="Set your phone number to enable" if no_phone) }}
+        {{ make_checkbox("a_call", "Phone Call", checked=user.available_call and not no_phone, disabled=no_phone, tooltip="Set your phone number to enable" if no_phone) }}
       </div>
       <p>Periodically after a class becomes available, send me:</p>
       <div class="mdl-grid">
         {{ make_checkbox("p_email", "Email", checked=True, disabled=True, tooltip="Email always enabled") }}
-        {{ make_checkbox("p_sms", "SMS Text", checked=user.periodically_sms, disabled=no_phone) }}
-        {{ make_checkbox("p_call", "Phone Call", checked=user.periodically_call, disabled=no_phone) }}
+        {{ make_checkbox("p_sms", "SMS Text", checked=user.periodically_sms and not no_phone, disabled=no_phone, tooltip="Set your phone number to enable" if no_phone) }}
+        {{ make_checkbox("p_call", "Phone Call", checked=user.periodically_call and not no_phone, disabled=no_phone, tooltip="Set your phone number to enable" if no_phone) }}
       </div>
       <p>When a class becomes unavailable, send me:</p>
       <div class="mdl-grid">
         {{ make_checkbox("u_email", "Email", checked=True, disabled=True, tooltip="Email always enabled") }}
-        {{ make_checkbox("u_sms", "SMS Text", checked=user.unavailable_sms, disabled=no_phone) }}
-        {{ make_checkbox("u_call", "Phone Call", disabled=True, tooltip="Phone call on unavailable is always disabled") }}
+        {{ make_checkbox("u_sms", "SMS Text", checked=user.unavailable_sms and not no_phone, disabled=no_phone, tooltip="Set your phone number to enable" if no_phone) }}
+        {{ make_checkbox("u_call", "Phone Call", disabled=True, tooltip="Phone call once unavailable is always disabled") }}
       </div>
       {{ make_button("Save Settings") }}
     {% endcall %}
   {% endcall %}
 {% endblock %}
-
-

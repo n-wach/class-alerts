@@ -37,7 +37,8 @@
         <i class="mdl-list__item-avatar material-icons">playlist_add</i>
         <span>Missing Your College?</span>
         <span class="mdl-list__item-text-body">
-          We're always looking to add support for more colleges. Request your college.
+          We're always looking to add support for more colleges.
+          Please request your college, and we'll have it added as soon as possible.
         </span>
       </span>
       <span class="mdl-list__item-secondary-action">
@@ -54,7 +55,7 @@
   {{ super() }}
 {% endblock %}
 {% block body %}
-  {% call centered_card("Select Your College", "college", "orange") %}
+  {% call centered_card("Select Your College", "college", "blue-grey") %}
     {{ csrf_token() }}
     {{ college_list() }}
   {% endcall %}

@@ -12,10 +12,24 @@ from db import db, User, update_all, FreePaymentCode
 from notifier import prepare_templates
 from colleges import colleges
 
-import logging
-
+import logging.handlers
 
 logger = logging.getLogger("app")
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+
+file_logger = logging.handlers.TimedRotatingFileHandler("logs/Alerts.log", when="midnight")
+file_logger.setFormatter(formatter)
+file_logger.setLevel(logging.DEBUG)
+logger.addHandler(file_logger)
+
+console_logger = logging.StreamHandler()
+console_logger.setFormatter(formatter)
+console_logger.setLevel(logging.DEBUG)
+logger.addHandler(console_logger)
+
+logger.info("Running app...")
 
 logger.info("Setting up...")
 app = Flask(__name__,
@@ -29,7 +43,6 @@ app.secret_key = os.environ.get("SECRET_KEY")
 
 logger.info("Defining Constants...")
 MAX_USER_REQUESTS = 15
-DEV_GEN = True
 
 
 logger.info("Routing pages...")
@@ -122,6 +135,10 @@ if not os.getcwd().endswith("Alerts"):
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.getcwd() + '/Alerts.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+if not os.path.exists(os.getcwd() + '/Alerts.db'):
+    logger.critical("Creating Database")
+    with app.app_context():
+        db.create_all()
 
 
 logger.info("Creating Scheduler...")
@@ -145,11 +162,5 @@ app.config["JOBS"] = [
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
-
-if DEV_GEN:
-    with app.app_context():
-        logger.warning("Generating DB")
-        db.create_all()
-
 
 logger.info("Starting...")

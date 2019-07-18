@@ -1,11 +1,11 @@
 {% extends "utility/layout.html" %}
 {% from "utility/forms.html" import make_form, make_input_field, make_button %}
-{% from "utility/cards.html" import centered_card %}
+{% from "utility/cards.html" import centered_card_back %}
 {% block head %}
   {{ super() }}
 {% endblock %}
 {% block body %}
-  {% call centered_card("Add a class", "add-class", "green") %}
+  {% call centered_card_back("Add a class", "add-class", "green") %}
     {% call make_form(url_for('api_class_add'), error) %}
       {{ user_college.add_template.render(user_college.add_template_params) | safe }}
       {{ make_button("Add this class") }}

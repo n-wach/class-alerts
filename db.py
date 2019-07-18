@@ -44,7 +44,7 @@ class User(db.Model):
     college = db.Column(db.String(30))
     registered_at = db.Column(db.DateTime)
 
-    def __init__(self, parent, email, phone, raw_password, role=ROLE_USER):
+    def __init__(self, parent, email, raw_password, role=ROLE_USER):
         self.uuid = str(uuid.uuid4())
         self.role = role
         self.parent_user = parent
@@ -53,7 +53,7 @@ class User(db.Model):
         self.is_paid = False
         self.last_payment = 0
         self.email = email
-        self.phone = phone
+        self.phone = ""
         self.available_sms = True
         self.periodically_sms = True
         self.unavailable_sms = True

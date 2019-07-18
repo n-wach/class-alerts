@@ -1,7 +1,7 @@
 import random
 from time import sleep
 
-from flask import session, request, url_for, redirect, abort, render_template
+from flask import session, request, url_for, redirect, abort
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -54,7 +54,6 @@ def route(app):
         create_email = request.form.get("email").lower()
         create_pw = request.form.get("password")
         confirm_pw = request.form.get("confirm")
-        create_phone = request.form.get("phone")
         match = User.query.filter_by(email=create_email).first()
 
         if match is not None:
@@ -63,10 +62,8 @@ def route(app):
             return errors("Password must be at least 6 characters long", "signup")
         elif create_pw != confirm_pw:
             return errors("Passwords do not match", "signup")
-        elif create_phone != "" and (len(create_phone) != 11 or not PATTERN_PHONE.match(create_phone)):
-            return errors("Invalid phone number format", "signup")
 
-        user = User("root", create_email, create_phone, create_pw)
+        user = User("root", create_email, create_pw)
         session["uuid"] = user.uuid
 
         if len(User.query.all()) == 0:
@@ -108,8 +105,9 @@ def route(app):
     @limiter.limit("20 per day")
     def api_college_select():
         user = get_user(session["uuid"])
+        if user.is_paid and user.get_college() is not None:
+            return redirect(url_for("landing_page"))
         college = request.form.get("college")
-        ret = request.form.get("ret", url_for("landing_page"))
         if college in college_short_names:
             user.college = college
             logger.info("{} changed their college to {}".format(user, college))
@@ -118,7 +116,7 @@ def route(app):
                 if req.college != college:
                     logger.info("Deleting {} because of college change".format(req))
                     req.delete()
-            return redirect(ret)
+            return redirect(url_for("settings", prop="notification"))
         else:
             logger.debug("Invalid choose-college: '{}' for {}".format(college, user))
             abort(400, "College not found")
@@ -307,7 +305,7 @@ def route(app):
     @requires_role(ROLE_MARKETER)
     def api_user_delete():
         user = get_user(session["uuid"])
-        to_delete = get_user(request.form("delete-uuid"))
+        to_delete = get_user(request.form.get("delete-uuid"))
         if not to_delete:
             abort(400, "Invalid UUID")
 
@@ -321,19 +319,6 @@ def route(app):
         else:
             logger.info("{} attempted to delete {} but had an insufficient role".format(user, to_delete))
             abort(401, "Insufficient Role")
-
-    @app.route("/api/user/delete-me", methods=["POST"])
-    @requires_signin
-    def api_user_delete_self():
-        user = get_user(session["uuid"])
-        if session["confirm-delete"] == "yes":
-            session.clear()
-            user.delete()
-            logger.info("{} deleted their account".format(user))
-            return errors("Your account has been deleted", "signup")
-        else:
-            logger.info("{} failed to delete their account".format(user))
-            abort(400, "Something went wrong.  Please contact support")
 
     @app.route("/api/user/settings/<prop>", methods=["POST"])
     @requires_signin
@@ -355,7 +340,7 @@ def route(app):
                     user.set_password(new_password_1)
                     logger.info("{} changed their password".format(user))
                     db.session.commit()
-                    return redirect(url_for("settings", prop="password"))
+                    return errors("Your password has been updated", "settings", prop="password")
             else:
                 logger.info("{} failed to change their password: invalid old password".format(user))
                 return errors("Invalid old password", "settings", prop="password")
@@ -390,14 +375,16 @@ def route(app):
                 return errors("Invalid phone", "settings", prop="notification")
         elif prop == "delete":
             logger.info("{} is going to delete their account".format(user))
-            session["confirm-delete"] = "yes"
-            return redirect(url_for("api_user_delete_self"))
+            session.clear()
+            user.delete()
+            logger.info("{} deleted their account".format(user))
+            return errors("Your account has been deleted", "signup")
         else:
             return errors("Nothing to update", "settings_list")
 
     @app.route("/api/signout")
     def api_signout():
-        user = get_user(session["uuid"])
+        user = get_user(session.get("uuid"))
         session.clear()
         logger.info("Logged out {}".format(user))
         return redirect(url_for("landing_page"))

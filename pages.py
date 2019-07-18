@@ -45,6 +45,9 @@ def route(app):
     @app.route("/choose-college", methods=["GET"])
     @requires_signin
     def college_select():
+        user = get_user(session["uuid"])
+        if user.is_paid and user.get_college() is not None:
+            return redirect(url_for("landing_page"))
         return render_template("user/college-selection.html")
 
     @app.route("/classes/add", methods=["GET"])

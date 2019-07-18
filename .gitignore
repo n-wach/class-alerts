@@ -1,7 +1,7 @@
 *.py~
 *.pyc
 *.log
-log/
+logs/
 startup.sh
 *.db
 .idea/

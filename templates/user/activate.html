@@ -1,16 +1,14 @@
 {% extends "utility/layout.html" %}
-{% from "utility/cards.html" import centered_card %}
+{% from "utility/cards.html" import centered_card_back %}
 {% from "utility/forms.html" import make_form, make_input_field, make_button %}
 {% block head %}
   {{ super() }}
 {% endblock %}
 {% block body %}
-  {% call centered_card("Activate Your Account", "renew", "purple") %}
-    <p>Activating your account will allow you to request classes for the current {{ user_college.renewal_period }}. It
-      costs
-      ${{ user_college.renewal_cost }} to activate your account (<strong>{{ user.email }}</strong>). You can pay online
-      with PayPal or
-      enter a Free {{ user_college.renewal_period|title }} Code below!
+  {% call centered_card_back("Activate Your Account", "renew", "purple") %}
+    <p>Activating your account will allow you to request classes for the current {{ user_college.renewal_period }}.
+      It costs ${{ user_college.renewal_cost }} to activate your account (<strong>{{ user.email }}</strong>).
+      You can pay online with PayPal or enter a Free {{ user_college.renewal_period|title }} Code below.
     </p>
     <p>
       If you experience any difficulties, please contact us.

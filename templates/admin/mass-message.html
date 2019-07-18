@@ -5,7 +5,7 @@
   {{ super() }}
 {% endblock %}
 {% block body %}
-  {% call centered_card("Mass Message", "mass-message", "pink") %}
+  {% call centered_card_back("Mass Message", "mass-message", "pink") %}
     {% call make_form(url_for('api_admin_message'), error) %}
       <h4>Message all users by Email and SMS:</h4>
       {{ make_input_field("text", "message", "Message", ".{10,}", "10 Characters at least...") }}
