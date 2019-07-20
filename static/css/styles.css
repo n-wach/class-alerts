@@ -200,7 +200,7 @@ header a {
     background-repeat: repeat-x;
     background-origin: content-box;
     height: 200px;
-    width: calc(200% + 1200px);
+    width: calc(1200px - -200%);
     position: relative;
     left: -100%;
     padding-left: 0;
