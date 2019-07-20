@@ -258,7 +258,8 @@ def route(app):
         email = request.form.get("email").lower()
         user = User.query.filter_by(email=email).first()
         if user:
-            recent = PasswordResetRequest.query.filter_by(user_uuid=user.uuid).order_by(PasswordResetRequest.created_at)[-1]
+            requests = PasswordResetRequest.query.filter_by(user_uuid=user.uuid).order_by(PasswordResetRequest.created_at)
+            recent = None if len(requests) == 0 else requests[-1]
             if recent and not recent.is_expired():
                 logger.info("Someone requested password reset for {}, which has recent {}".format(user, recent))
                 sleep(random.random() + 0.2)
