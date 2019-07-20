@@ -1,14 +1,5 @@
 function info(url) {
-    var features = 'toolbar=no,' +
-        'status=no,' +
-        'scrollbars=yes,' +
-        'menubar=yes,' +
-        'resizable=yes,' +
-        'width=600,' +
-        'height=375,' +
-        'left=200,' +
-        'top=200';
-    window.open(url, ''); // features);
+    window.open(url, '');
 }
 
 function visit(url) {
