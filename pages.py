@@ -1,4 +1,4 @@
-from flask import render_template, session, redirect, url_for
+from flask import render_template, session, redirect, url_for, abort, request
 
 from db import get_user, ROLE_ADMIN, ROLE_MARKETER
 from colleges import college_short_names
@@ -135,4 +135,10 @@ def route(app):
     @app.route("/about", methods=["GET"])
     def about_page():
         return render_template("public/about.html")
+
+    @app.route("/echo", methods=["GET"])
+    def echo():
+        print("ECHO CALLED {}".format(request.url))
+        print("ARGS: {}".format(request.args))
+        abort(404)
 
