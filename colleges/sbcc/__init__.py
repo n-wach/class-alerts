@@ -1,5 +1,6 @@
 import re
-from urllib.request import urlopen
+
+from tor import urlopen
 
 from jinja2 import Template
 
@@ -63,7 +64,7 @@ class SBCC(College):
         def __init__(self, crn, term):
             super().__init__()
             self.url = SBCC.Class.base_url + ".p_course_popup?vterm={}&vcrn={}".format(term, crn)
-            html = urlopen(self.url).read().decode()
+            html = urlopen(self.url).text
             self.vcrn = crn
             self.vterm = term
             self.vsub = SBCC.Class.PATTERN_VSUB.search(html).group(2)
@@ -82,7 +83,7 @@ class SBCC(College):
             self.update_status()
 
         def update_status(self):
-            html = urlopen(self.url).read().decode()
+            html = urlopen(self.url).text
             a = SBCC.Class.PATTERN_AVAIL.findall(html)
             self.total_normal_seats = int("".join(a[0]))
             self.normal_seats_avail = int("".join(a[2]))
