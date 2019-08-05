@@ -14,8 +14,8 @@ class SBCC(College):
     name = "Santa Barbara City College"
     icon = "images/sbcc.jpg"
 
-    terms = ["202015"]
-    term_names = ["Summer II 2019"]
+    terms = ["202030"]
+    term_names = ["Fall 2019"]
 
     add_template_params = {"terms": terms, "term_names": term_names}
 
