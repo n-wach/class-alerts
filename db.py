@@ -22,6 +22,8 @@ ROLE_ADMIN = 10
 ROLE_MARKETER = 100
 ROLE_USER = 200
 
+update_count = 0
+
 
 class User(db.Model):
     __tablename__ = "Users"
@@ -360,7 +362,7 @@ class ClassMonitor(db.Model):
         self.has_availability = cl.update_status()
         self.class_instance = cl
         self.last_checked = datetime.now()
-        db.session.add(self)
+        db.session.merge(self)
         for request in ClassRequest.query.filter_by(monitor_uuid=self.uuid).all():
             request.update()
             db.session.add(request)
@@ -376,14 +378,18 @@ class ClassMonitor(db.Model):
 
 
 def update_all(app):
+    global update_count
+    update_count += 1
+    update_id = update_count % 1000
+
     try:
         start = time.time()
         class_monitors = ClassMonitor.query.all()
 
-        logger.debug("Updating {} monitors".format(len(class_monitors)))
+        logger.debug("Updating {} monitors ({})".format(len(class_monitors), update_id))
 
-        threads = (threading.Thread(target=ClassMonitor.update_with_context, args=(monitor, app)) for monitor in
-                   class_monitors)
+        threads = list(threading.Thread(target=ClassMonitor.update_with_context, args=(monitor, app)) for monitor in
+                       class_monitors)
 
         for thread in threads:
             thread.start()
@@ -391,10 +397,10 @@ def update_all(app):
         for thread in threads:
             thread.join()
 
-        logger.debug("Updated {} listings in {} seconds".format(len(class_monitors), time.time() - start))
+        logger.debug("Updated {} listings in {:.4} seconds ({})".format(len(class_monitors), time.time() - start, update_id))
 
     except Exception:
-        logger.exception("Error updating class monitors")
+        logger.exception("Error updating class monitors ({})".format(update_id))
 
 
 def get_user(u):

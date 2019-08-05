@@ -1,24 +1,24 @@
 <div class="mdl-grid">
   <div class="mdl-layout-spacer"></div>
   <div class="mdl-cell mdl-cell--8-col mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
-    <select class="mdl-selectfield__select" id="year" name="year">
-      {% for year in years %}
-        <option value="{{ year }}">{{ year }}</option>
+    <select class="mdl-selectfield__select" id="quarter" name="quarter">
+      {% for quarter in quarters %}
+        <option value="{{ quarter[0] }}">{{ quarter[1] }}</option>
       {% endfor %}
     </select>
-    <label class="mdl-selectfield__label" for="year">Year</label>
+    <label class="mdl-selectfield__label" for="quarter">Quarter</label>
   </div>
   <div class="mdl-layout-spacer"></div>
 </div>
 <div class="mdl-grid">
   <div class="mdl-layout-spacer"></div>
   <div class="mdl-cell mdl-cell--8-col mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
-    <select class="mdl-selectfield__select" id="term" name="term">
-      {% for term in term_names %}
-        <option value="{{ term }}">{{ term }}</option>
+    <select class="mdl-selectfield__select" id="subject" name="subject">
+      {% for subject in subjects %}
+        <option value="{{ subject[0] }}">{{ subject[1] }}</option>
       {% endfor %}
     </select>
-    <label class="mdl-selectfield__label" for="term">Term</label>
+    <label class="mdl-selectfield__label" for="subject">Subject</label>
   </div>
   <div class="mdl-layout-spacer"></div>
 </div>
@@ -26,9 +26,9 @@
   <div class="mdl-layout-spacer"></div>
   <div class="mdl-cell mdl-cell--8-col">
     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-      <input class="mdl-textfield__input" type="text" name="crn" id="crn" pattern="\d{5}">
-      <label class="mdl-textfield__label" for="crn">CRN</label>
-      <span class="mdl-textfield__error">CRN is a 5 digit number</span>
+      <input class="mdl-textfield__input" type="text" name="code" id="code" pattern="[0-9]{1,5}(?:\/[A-Z])?">
+      <label class="mdl-textfield__label" for="code">Enrollment or Section Code</label>
+      <span class="mdl-textfield__error">Example: <code>00172</code> or <code>03892/B</code></span>
     </div>
   </div>
   <div class="mdl-layout-spacer"></div>

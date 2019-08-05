@@ -1,6 +1,10 @@
 from jinja2 import Template
 
 
+class ClassUpdateException(RuntimeError):
+    pass
+
+
 class College:
     short_name = "GC"
     name = "Generic College"
@@ -12,11 +16,11 @@ class College:
     add_template = Template("<p>Generic College Add Template</p>")
 
     @staticmethod
-    def verify_add_request(request):
+    def verify_add_request(form):
         raise NotImplementedError
 
     @staticmethod
-    def monitor_from_add_request(request):
+    def monitor_from_add_request(form):
         raise NotImplementedError
 
     class Class:

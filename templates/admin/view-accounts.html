@@ -10,7 +10,7 @@
     <td>
       {% if u.get_requests()|length %}
         {% for r in u.get_requests() %}
-          {{ r.display_name }}
+          {{ r.get_monitor().class_instance.display_name }}
         {% endfor %}
       {% else %}
         No Classes

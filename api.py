@@ -134,7 +134,7 @@ def route(app):
                 logger.info("Invalid add request '{}' for {} by {}".format(request.form, college, user))
                 return errors("Invalid add request", "class_add")
 
-            class_monitor = college.monitor_from_add_request(request)
+            class_monitor = college.monitor_from_add_request(request.form)
 
             if len(ClassRequest.query.filter_by(monitor_uuid=class_monitor.uuid, requester_uuid=user.uuid).all()) > 0:
                 logger.info("Duplicate add request for {} by {}".format(class_monitor, user))
@@ -161,9 +161,10 @@ def route(app):
         try:
             monitor_uuid = request.form.get("uuid")
             req = ClassRequest.query.filter_by(requester_uuid=user.uuid, monitor_uuid=monitor_uuid).first()
+            s = "{} removed {}".format(user, req)
             req.delete()
-            logger.info("{} removed {}".format(user, req))
-        except Exception as e:
+            logger.info(s)
+        except Exception:
             logger.exception("Error removing class with UUID {} from {}".format(request.form.get("uuid"), user))
             abort(400, "Class info is invalid")
         return redirect(url_for("landing_page"))
