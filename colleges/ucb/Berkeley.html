@@ -1,35 +1,8 @@
-<div class="mdl-grid">
-  <div class="mdl-layout-spacer"></div>
-  <div class="mdl-cell mdl-cell--8-col mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
-    <select class="mdl-selectfield__select" id="year" name="year">
-      {% for year in years %}
-        <option value="{{ year }}">{{ year }}</option>
-      {% endfor %}
-    </select>
-    <label class="mdl-selectfield__label" for="year">Year</label>
-  </div>
-  <div class="mdl-layout-spacer"></div>
-</div>
-<div class="mdl-grid">
-  <div class="mdl-layout-spacer"></div>
-  <div class="mdl-cell mdl-cell--8-col mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
-    <select class="mdl-selectfield__select" id="term" name="term">
-      {% for term in term_names %}
-        <option value="{{ term }}">{{ term }}</option>
-      {% endfor %}
-    </select>
-    <label class="mdl-selectfield__label" for="term">Term</label>
-  </div>
-  <div class="mdl-layout-spacer"></div>
-</div>
-<div class="mdl-grid">
-  <div class="mdl-layout-spacer"></div>
-  <div class="mdl-cell mdl-cell--8-col">
-    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-      <input class="mdl-textfield__input" type="text" name="crn" id="crn" pattern="\d{5}">
-      <label class="mdl-textfield__label" for="crn">CRN</label>
-      <span class="mdl-textfield__error">CRN is a 5 digit number</span>
-    </div>
-  </div>
-  <div class="mdl-layout-spacer"></div>
-</div>
+{% from "utility/forms.html" import make_select_field, make_input_field %}
+<img src="{{ url_for("static", filename="svg/berkeley-format.svg") }}" alt="Berkeley Class Format" style="margin: 0; width: 80%">
+{{ make_select_field("term", "Term", terms) }}
+{{ make_select_field("subject", "Subject", subjects) }}
+{{ make_input_field("text", "course", "Course", "[0-9A-Z]+", "For example: 1A, CS32, 220", required=True) }}
+{{ make_input_field("text", "course_number", "Course Number", "[0-9]+", "For example: 001, 002, 1", required=True) }}
+{{ make_input_field("text", "section_type", "Section Type", "[A-Z]+", "For example: LEC, SEM, DIS, LAB", required=True) }}
+{{ make_input_field("text", "section_number", "Section Number", "[0-9]+", "Typically the same as the Course Number", required=True) }}

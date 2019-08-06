@@ -46,7 +46,7 @@ def route(app):
     @requires_signin
     def college_select():
         user = get_user(session["uuid"])
-        if user.is_paid and user.get_college() is not None:
+        if user.is_paid and user.get_college() is not None and user.role > ROLE_ADMIN:
             return redirect(url_for("landing_page"))
         return render_template("user/college-selection.html")
 

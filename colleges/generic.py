@@ -1,4 +1,11 @@
-from jinja2 import Template
+from flask import session, url_for
+from jinja2 import Environment, ChoiceLoader, FileSystemLoader, Template
+
+loader = ChoiceLoader([FileSystemLoader("colleges/"),
+                       FileSystemLoader("templates/")])
+template_environment = Environment(loader=loader)
+template_environment.globals.update(session=session)
+template_environment.globals.update(url_for=url_for)
 
 
 class ClassUpdateException(RuntimeError):

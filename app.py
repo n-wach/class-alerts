@@ -15,7 +15,7 @@ from colleges import colleges
 import logging.handlers
 
 logger = logging.getLogger("app")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -148,6 +148,8 @@ def background_monitor():
     with app.app_context():
         update_all(app)
 
+
+background_monitor()
 
 app.config["SCHEDULER_API_ENABLED"] = False
 app.config["JOBS"] = [

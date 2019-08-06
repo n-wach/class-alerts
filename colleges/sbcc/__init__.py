@@ -14,16 +14,14 @@ class SBCC(College):
     name = "Santa Barbara City College"
     icon = "images/sbcc.jpg"
 
-    terms = ["202015"]
-    term_names = ["Summer II 2019"]
+    terms = [("202030", "Fall 2019")]
 
-    add_template_params = {"terms": terms, "term_names": term_names}
+    add_template_params = {"terms": terms}
 
     with open('colleges/sbcc/SBCC.html') as file_:
         add_template = Template(file_.read())
 
     PATTERN_CRN = re.compile(r"[0-9]{5}")
-    PATTERN_TERM = re.compile(r"[0-9]{6}")
 
     @staticmethod
     def verify_add_request(form):

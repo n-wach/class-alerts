@@ -105,7 +105,7 @@ def route(app):
     @limiter.limit("20 per day")
     def api_college_select():
         user = get_user(session["uuid"])
-        if user.is_paid and user.get_college() is not None:
+        if user.is_paid and user.get_college() is not None and user.role > ROLE_ADMIN:
             return redirect(url_for("landing_page"))
         college = request.form.get("college")
         if college in college_short_names:

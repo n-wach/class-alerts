@@ -362,8 +362,12 @@ class ClassMonitor(db.Model):
         self.has_availability = cl.update_status()
         self.class_instance = cl
         self.last_checked = datetime.now()
+        requests = ClassRequest.query.filter_by(monitor_uuid=self.uuid).all()
+        if len(requests) == 0:
+            db.session.merge(self).delete()
+            return
         db.session.merge(self)
-        for request in ClassRequest.query.filter_by(monitor_uuid=self.uuid).all():
+        for request in requests:
             request.update()
             db.session.add(request)
         db.session.commit()
@@ -385,6 +389,8 @@ def update_all(app):
     try:
         start = time.time()
         class_monitors = ClassMonitor.query.all()
+        if len(class_monitors) == 0:
+            return
 
         logger.debug("Updating {} monitors ({})".format(len(class_monitors), update_id))
 
