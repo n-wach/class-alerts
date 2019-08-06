@@ -5,3 +5,5 @@ logs/
 startup.sh
 *.db
 .idea/
+.bin
+yuicompressor/
