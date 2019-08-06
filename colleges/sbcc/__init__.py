@@ -6,20 +6,19 @@ from jinja2 import Template
 
 from db import ClassMonitor, db
 from decorators import errors
-from colleges.generic import College
+from colleges.generic import College, template_environment
 
 
 class SBCC(College):
     short_name = "SBCC"
     name = "Santa Barbara City College"
-    icon = "images/sbcc.jpg"
+    icon = "images/sbcc.png"
 
     terms = [("202030", "Fall 2019")]
 
     add_template_params = {"terms": terms}
 
-    with open('colleges/sbcc/SBCC.html') as file_:
-        add_template = Template(file_.read())
+    add_template = template_environment.get_template("sbcc/SBCC.html")
 
     PATTERN_CRN = re.compile(r"[0-9]{5}")
 
@@ -72,7 +71,7 @@ class SBCC(College):
             self.total_waitlist_seats = 0
             self.waitlist_seats_avail = 0
 
-            self.display_name = "%s %s (CRN: %s)" % (self.vsub, self.vcrse, self.vcrn)
+            self.display_name = "{} {} (CRN: {})".format(self.vsub, self.vcrse, self.vcrn)
             self.status_message = "SBCC Status"
             self.info_url = SBCC.Class.base_url + ".p_course_popup?vsub={}&vcrse={}&vterm={}&vcrn={}".format(self.vsub,
                                                                                                              self.vcrse,
@@ -87,9 +86,10 @@ class SBCC(College):
             self.normal_seats_avail = int("".join(a[2]))
             self.total_waitlist_seats = int("".join(a[3]))
             self.waitlist_seats_avail = int("".join(a[5]))
-            self.status_message = "Seats Taken: %d of %d | Waitlist Spots Taken: %d of %d" \
-                                  % (self.total_normal_seats - self.normal_seats_avail, self.total_normal_seats,
-                                     self.total_waitlist_seats - self.waitlist_seats_avail, self.total_waitlist_seats)
+            self.status_message = "Seats Taken: {} / {} | Waitlist: {} / {}".format(self.total_normal_seats - self.normal_seats_avail,
+                                                                                    self.total_normal_seats,
+                                                                                    self.total_waitlist_seats - self.waitlist_seats_avail,
+                                                                                    self.total_waitlist_seats)
             if self.total_waitlist_seats == 0:
                 self.has_availability = self.normal_seats_avail > 0
             else:
