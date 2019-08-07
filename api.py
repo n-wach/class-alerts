@@ -132,7 +132,7 @@ def route(app):
             verified = college.verify_add_request(request.form)
             if verified is not True:
                 logger.info("Invalid add request '{}' for {} by {}".format(request.form, college, user))
-                return errors("Invalid add request", "class_add")
+                return verified
 
             class_monitor = college.monitor_from_add_request(request.form)
 

@@ -1,0 +1,4 @@
+{% from "utility/forms.html" import make_select_field, make_input_field %}
+{{ make_select_field("subject", "Subject", subjects) }}
+{{ make_input_field("text", "catalog_number", "Catalog Number", "\d+", "For example 101, 120, 313", required=True) }}
+{{ make_input_field("text", "class_number", "Class Number", "\d+", "For example 6272, 6703, 2341", required=True) }}
