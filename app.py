@@ -8,14 +8,15 @@ from babel.dates import format_timedelta, format_datetime
 from flask import Flask, session, abort, request
 from flask_apscheduler import APScheduler
 
-from db import db, User, update_all, FreePaymentCode
-from notifier import prepare_templates
-from colleges import colleges
-
 import logging.handlers
 
 logger = logging.getLogger("app")
-logger.setLevel(logging.DEBUG)
+level_str = os.environ.get("LOG_LEVEL")
+levels = {
+    "info": logging.INFO,
+    "debug": logging.DEBUG
+}
+logger.setLevel(levels.get(level_str, logging.INFO))
 
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -30,6 +31,12 @@ console_logger.setLevel(logging.DEBUG)
 logger.addHandler(console_logger)
 
 logger.info("Running app...")
+
+
+logger.info("Preparing colleges")
+from db import db, User, update_all, FreePaymentCode
+from notifier import prepare_templates
+from colleges import colleges
 
 logger.info("Setting up...")
 app = Flask(__name__,

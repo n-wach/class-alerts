@@ -7,7 +7,7 @@ from jinja2 import Template
 
 from db import ClassMonitor, db
 from decorators import errors
-from colleges.generic import College, ClassUpdateException
+from colleges.generic import College, ClassUpdateException, template_environment
 
 
 class UCSB(College):
@@ -33,8 +33,7 @@ class UCSB(College):
 
     request_cookies = landing_page_request.cookies.get_dict()
 
-    with open('colleges/ucsb/UCSB.html') as file_:
-        add_template = Template(file_.read())
+    add_template = template_environment.get_template("ucsb/UCSB.html")
 
     PATTERN_CODE = re.compile(r"[0-9]{1,5}(?:\/[A-Z])?")
 

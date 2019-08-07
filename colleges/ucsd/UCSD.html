@@ -1,0 +1,4 @@
+{% from "utility/forms.html" import make_select_field, make_input_field %}
+{{ make_select_field("term", "Term", terms) }}
+{{ make_input_field("text", "section", "Section ID", "\d+",
+                    "Example: <code>987654</code>", required=True) }}
