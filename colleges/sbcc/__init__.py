@@ -77,6 +77,7 @@ class SBCC(College):
                                                                                                              self.vcrse,
                                                                                                              self.vterm,
                                                                                                              self.vcrn)
+            self.action_url = "https://banner.sbcc.edu/PROD/bwskfreg.P_AltPin"
             self.update_status()
 
         def update_status(self):

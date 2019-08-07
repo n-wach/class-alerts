@@ -124,6 +124,7 @@ class UCB(College):
                                                                                             course_number.lower(),
                                                                                             section_type.lower(),
                                                                                             section_number.lower())
+            self.action_url = "https://calcentral.berkeley.edu/"
             self.update_status()
 
         def update_status(self):

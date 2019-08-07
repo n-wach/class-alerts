@@ -97,6 +97,7 @@ class UCSB(College):
             self.display_name = "UCSB Unnamed"
             self.status_message = "UCSB Status"
             self.info_url = "https://my.sa.ucsb.edu/public/curriculum/coursesearch.aspx"
+            self.action_url = "https://my.sa.ucsb.edu/gold/login.aspx"
 
             self.update_status()
 

@@ -74,6 +74,7 @@ class UCSD(College):
             self.display_name = "UCSD Unnamed"
             self.status_message = "UCSD Status"
             self.info_url = "https://act.ucsd.edu/scheduleOfClasses/scheduleOfClassesStudent.htm"
+            self.action_url = "https://a5.ucsd.edu/tritON/profile/SAML2/Redirect/SSO?execution=e2s1"
 
             self.update_status()
 

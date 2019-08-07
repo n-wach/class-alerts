@@ -106,6 +106,7 @@ class CalpolySLO(College):
             self.display_name = "Calpoly SLO Unnamed"
             self.status_message = "Calpoly SLO Status"
             self.info_url = "https://pass.calpoly.edu/main.html"
+            self.action_url = "https://pass.calpoly.edu/main.html"
 
             self.update_status()
 
