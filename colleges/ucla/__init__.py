@@ -100,7 +100,7 @@ class UCLA(College):
             self.update_status()
 
         def update_status(self):
-            response = urlpost(self.info_url)
+            response = urlpost(self.info_url, tor=True)
             info_page = BeautifulSoup(response.text, "html.parser")
 
             class_name = list(info_page.find("div", id="subject_class").p.stripped_strings)[-1]
