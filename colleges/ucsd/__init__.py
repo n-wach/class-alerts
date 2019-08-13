@@ -39,7 +39,7 @@ class UCSD(College):
         if term not in (term[0] for term in UCSD.terms):
             return errors("Invalid term", "class_add")
         if not UCSD.PATTERN_SECTION.match(section):
-            return errors("Invalid code", "class_add")
+            return errors("Invalid section code", "class_add")
 
         return True
 
@@ -184,4 +184,4 @@ class UCSD(College):
             raise ClassUpdateException("Failed to find matching section TR")
 
         def __str__(self):
-            return "<UCSB {}>".format(self.display_name)
+            return "<UCSD {}>".format(self.display_name)
