@@ -10,10 +10,10 @@ logger = logging.getLogger("app.notifier")
 
 twilio_sid = os.environ.get("TWILIO_SID")
 twilio_auth = os.environ.get("TWILIO_AUTH")
-twilio_sender = "+18056181459"
-USE_TWILIO = False
+twilio_sender = os.environ.get("TWILIO_NUMBER", "+18056181459")
+use_twilio = bool(os.environ.get("USE_TWILIO", False))
 
-email_sender = "Class Alerts <info@m.classalerts.org>"
+email_sender = os.environ.get("EMAIL_SENDER", "Class Alerts <info@m.classalerts.org>")
 email_api_key = os.environ.get("EMAIL_API_KEY")
 email_url = "https://api.mailgun.net/v3/m.classalerts.org/messages"
 
@@ -51,7 +51,7 @@ def send_sms(raw_phone, message):
     if len(str(raw_phone)) != 11:
         logger.info("Failed to send SMS to '{}'".format(raw_phone))
         return
-    if USE_TWILIO:
+    if use_twilio:
         client.messages.create(
             to="+" + str(raw_phone),
             body=message,
@@ -86,7 +86,7 @@ def send_call(raw_phone, url):
     if len(str(raw_phone)) != 11:
         logger.info("Failed to send call to '{}'".format(raw_phone))
         return
-    if USE_TWILIO:
+    if use_twilio:
         client.calls.create(
             to="+" + str(raw_phone),
             from_=twilio_sender,
