@@ -19,7 +19,7 @@ logger = logging.getLogger("app.api")
 
 
 def route(app):
-    limiter = Limiter(app, key_func=get_remote_address, default_limits=["100 per hour", "10 per second"])
+    limiter = Limiter(app, key_func=get_remote_address, default_limits=["1000 per hour", "5 per second"])
     for handler in logger.handlers:
         limiter.logger.addHandler(handler)
 

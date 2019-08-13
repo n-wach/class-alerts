@@ -33,8 +33,7 @@ def std_urlpost(url, **kwargs):
 
 def tor_urlpost(url, **kwargs):
     logger.debug("Getting with TOR: {}".format(url))
-    if time.time() - last_refresh > 4:
-        refresh_ip()
+    c_refresh_ip()
 
     session = requests.session()
     session.proxies = {
@@ -60,15 +59,22 @@ def std_urlget(url, **kwargs):
 
 
 def tor_urlget(url, **kwargs):
+
     logger.debug("Getting with TOR: {}".format(url))
-    if time.time() - last_refresh > 4:
-        refresh_ip()
+    c_refresh_ip()
 
     session = requests.session()
     session.proxies = {
         "http": "socks5h://localhost:9050",
         "https": "socks5h://localhost:9050"}
     return session.get(url, **kwargs)
+
+
+def c_refresh_ip():
+    global last_refresh
+    if time.time() - last_refresh > 4:
+        last_refresh = time.time()
+        refresh_ip()
 
 
 def refresh_ip():
