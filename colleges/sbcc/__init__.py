@@ -1,8 +1,8 @@
 import re
 
-from tor import urlget
+from bs4 import BeautifulSoup
 
-from jinja2 import Template
+from tor import urlget
 
 from db import ClassMonitor, db
 from decorators import errors
@@ -14,7 +14,15 @@ class SBCC(College):
     name = "Santa Barbara City College"
     icon = "images/sbcc.png"
 
-    terms = [("202030", "Fall 2019")]
+    search_req = urlget("https://banner.sbcc.edu/PROD/pw_pub_sched.p_search")
+
+    search_page = BeautifulSoup(search_req.text, "html.parser")
+
+    term_options = search_page.find("select", attrs={"name": "term"}).findChildren("option")
+
+    terms = []
+    for option in term_options:
+        terms.append((option["value"], option.string))
 
     add_template_params = {"terms": terms}
 

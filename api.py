@@ -113,7 +113,7 @@ def route(app):
             logger.info("{} changed their college to {}".format(user, college))
             db.session.commit()
             for req in user.get_requests():
-                if req.college != college:
+                if req.get_monitor().college != college:
                     logger.info("Deleting {} because of college change".format(req))
                     req.delete()
             return redirect(url_for("settings", prop="notification"))
