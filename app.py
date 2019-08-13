@@ -46,6 +46,7 @@ app = Flask(__name__,
 
 logger.info("Configuring...")
 app.secret_key = os.environ.get("SECRET_KEY")
+app.config["SERVER_NAME"] = "classalerts.org"
 
 
 logger.info("Defining Constants...")
