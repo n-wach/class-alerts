@@ -97,7 +97,7 @@ def send_call(raw_phone, url):
 
 
 def send_call_open(user, monitor):
-    send_call(user.phone, url_for("voice_open", monitor=monitor.uuid))
+    send_call(user.phone, url_for("voice_open", monitor_uuid=monitor.uuid))
 
 
 def send_call_remind(user, monitor):
