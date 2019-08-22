@@ -8,7 +8,6 @@
 {% endblock %}
 {% block body %}
   {% call settings_card("Change Notification Settings") %}
-    {{ csrf_token() }}
     {% call make_form(url_for("api_user_settings", prop="notification"), error) %}
       <p>If you want to be notified with text messages and phone calls, please provide your phone number.</p>
       {{ make_input_field("text", "phone", "Phone Number", "[0-9]{11}", "<code>+1(456)789-0123</code> should be input as <code>14567890123</code>", value=user.phone) }}
@@ -32,6 +31,21 @@
         {{ make_checkbox("u_call", "Phone Call", disabled=True, tooltip="Phone call once unavailable is always disabled") }}
       </div>
       {{ make_button("Save Settings") }}
+      <script>
+      let phone = document.getElementById("phone");
+      let checks = ["a_sms", "a_call", "p_sms", "p_call", "u_sms"];
+      phone.addEventListener("input", function(){
+        let enable = phone.value.match(phone.pattern) !== null;
+        checks.forEach(function(name){
+            let e = document.getElementById(name).parentElement.MaterialCheckbox;
+            if(enable) {
+                e.enable();
+            } else {
+                e.disable();
+            }
+        });
+      })
+      </script>
     {% endcall %}
   {% endcall %}
 {% endblock %}

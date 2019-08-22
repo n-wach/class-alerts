@@ -95,7 +95,7 @@ class UCLA(College):
             else:
                 raise ClassUpdateException("Class section not found in search results")
 
-            self.action_url = "https://shb.ais.ucla.edu/shibboleth-idp/profile/SAML2/Redirect/SSO?execution=e1s2"
+            self.action_url = "http://my.ucla.edu/directLink.aspx?featureID=203"
 
             self.update_status()
 

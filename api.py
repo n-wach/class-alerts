@@ -400,10 +400,14 @@ def route(app):
                          value_pattern=PATTERN_NOT_EMPTY)
     @limiter.limit("5 per day")
     def api_send_contact():
+        honeypot = request.form.get("phone")
         email = request.form.get("email")
         subject = request.form.get("subject", "No Subject")
         msg = request.form.get("message")
-        logger.info("{} sending contact email with subject '{}'".format(email, subject))
-        send_contact_email(email, subject, msg)
+        if honeypot == "18004206969":
+            logger.info("{} sending contact email with subject '{}'".format(email, subject))
+            send_contact_email(email, subject, msg)
+        else:
+            logger.info("Honeypot detected spam from {} with subject '{}'".format(email, subject))
         return errors("Your message has been sent", "contact_page")
 

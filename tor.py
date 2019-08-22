@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger("app.tor")
 
-use_tor = bool(os.environ.get("USE_TOR", False))
+use_tor = os.environ.get("USE_TOR") == "True"
 tor_password = os.environ.get("TOR_PASSWORD", "password")
 last_refresh = time.time()
 
@@ -78,7 +78,7 @@ def c_refresh_ip():
 
 
 def refresh_ip():
-    logger.info("Refreshing TOR IP")
+    logger.debug("Refreshing TOR IP")
     with Controller.from_port(port=9051) as controller:
         controller.authenticate(password=tor_password)
         controller.signal(Signal.NEWNYM)
