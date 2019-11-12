@@ -132,7 +132,7 @@ class User(db.Model):
             return [self]
 
     def get_visible_codes(self):
-        if self.role <= ROLE_ADMIN:
+        if self.role <= ROLE_MARKETER:
             return FreePaymentCode.query.all()
         else:
             return FreePaymentCode.query.filter_by(creator_uuid=self.uuid).all()
