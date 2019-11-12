@@ -126,6 +126,8 @@ class User(db.Model):
     def get_visible_users(self):
         if self.role <= ROLE_ADMIN:
             return User.query.all()
+        if self.role <= ROLE_MARKETER:
+            return User.query.filter_by(college=self.college).all()
         else:
             return [self]
 

@@ -70,7 +70,7 @@ def route(app):
         return render_template("admin/view-codes.html", error=error)
 
     @app.route("/admin/view-accounts", methods=["GET"])
-    @requires_role(ROLE_ADMIN)
+    @requires_role(ROLE_MARKETER)
     def admin_users_view():
         return render_template("admin/view-accounts.html")
 
