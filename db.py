@@ -126,11 +126,13 @@ class User(db.Model):
     def get_visible_users(self):
         if self.role <= ROLE_ADMIN:
             return User.query.all()
+        if self.role <= ROLE_MARKETER:
+            return User.query.filter_by(college=self.college).all()
         else:
             return [self]
 
     def get_visible_codes(self):
-        if self.role <= ROLE_ADMIN:
+        if self.role <= ROLE_MARKETER:
             return FreePaymentCode.query.all()
         else:
             return FreePaymentCode.query.filter_by(creator_uuid=self.uuid).all()
