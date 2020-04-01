@@ -8,10 +8,9 @@
     {% if resp["CHECKOUTSTATUS"] == "PaymentActionCompleted" %}
       Awesome! Thank you for your <strong>{{ resp["AMT"] }} {{ resp["CURRENCYCODE"] }}</strong> purchase.<br>
       A confirmation email has been sent to <strong>{{ payment.email }}</strong> with more info.<br><br>
-      <strong><span style="color: red">DO NOT PRESS BACK. CLOSE THIS TAB TO AVOID BEING CHARGED TWICE.</span></strong>
     {% else %}
       Oh no! PayPal doesn't acknowledge this transaction. Here's the status: {{ resp["CHECKOUTSTATUS"] }} <br>
-      Please contact us at <strong>sbccalerts@gmail.com</strong>if you're having any trouble.<br>
+      Please contact us if you're having any trouble.<br>
     {% endif %}
   {% endcall %}
 {% endblock %}

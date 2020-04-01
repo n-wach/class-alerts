@@ -136,7 +136,7 @@ def send_verification_email(user):
 
 def send_activation_email(user, transaction_info):
     send_email(user.email, "Account Activated",
-               TEMPLATE_ACTIVATED.render(user=user, resp=transaction_info),
+               TEMPLATE_ACTIVATED.render(user=user, transaction_info=transaction_info),
                "Account activated!")
 
 
