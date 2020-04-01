@@ -55,31 +55,35 @@ def route(app):
         create_pw = request.form.get("password")
         confirm_pw = request.form.get("confirm")
         match = User.query.filter_by(email=create_email).first()
+        honeypot = request.form.get("phone")
+        if honeypot == "18004206969":
+            if match is not None:
+                return errors("This email is already in use.  Please use a different one or sign in", "signup")
+            elif len(create_pw) < 6:
+                return errors("Password must be at least 6 characters long", "signup")
+            elif create_pw != confirm_pw:
+                return errors("Passwords do not match", "signup")
 
-        if match is not None:
-            return errors("This email is already in use.  Please use a different one or sign in", "signup")
-        elif len(create_pw) < 6:
-            return errors("Password must be at least 6 characters long", "signup")
-        elif create_pw != confirm_pw:
-            return errors("Passwords do not match", "signup")
+            user = User("root", create_email, create_pw)
+            session["uuid"] = user.uuid
 
-        user = User("root", create_email, create_pw)
-        session["uuid"] = user.uuid
-
-        if len(User.query.all()) == 0:
-            user.role = ROLE_ADMIN
-            user.is_verified = True
-            user.is_paid = True
-            logger.warning("First user {} created and given ROLE_ADMIN".format(user))
-            db.session.add(user)
-            db.session.commit()
-            return redirect(url_for("landing_page"))
+            if len(User.query.all()) == 0:
+                user.role = ROLE_ADMIN
+                user.is_verified = True
+                user.is_paid = True
+                logger.warning("First user {} created and given ROLE_ADMIN".format(user))
+                db.session.add(user)
+                db.session.commit()
+                return redirect(url_for("landing_page"))
+            else:
+                logging.info("New user {} created".format(user))
+                db.session.add(user)
+                db.session.commit()
+                send_verification_email(user)
+                return redirect(url_for("verify_email"))
         else:
-            logging.info("New user {} created".format(user))
-            db.session.add(user)
-            db.session.commit()
-            send_verification_email(user)
-            return redirect(url_for("verify_email"))
+            logger.info("Honeypot detected spam from {} with subject '{}'".format(email, subject))
+
 
     @app.route("/api/user/verify-email/<code>")
     @requires_signin

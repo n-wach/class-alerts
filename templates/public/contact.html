@@ -9,7 +9,7 @@
     {% call make_form(url_for("api_send_contact"), error) %}
       If you have any questions, comments, or concerns, don't hesitate to contact us!
       Please include your email so we can respond to your message.
-      <div class="ja">
+      <div data-skip-on-tab="true" class="ja">
         {{ make_input_field("phone", "phone", "Your Phone", required=True) }}
         <script>
           document.getElementById("phone").value="18004206969";
