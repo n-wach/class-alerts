@@ -262,6 +262,7 @@ class Payment(db.Model):
             send_activation_email(user, transaction_info)
             self.is_complete = True
             self.completed_at = datetime.now()
+            db.session.commit()
             return True
 
     def delete(self):

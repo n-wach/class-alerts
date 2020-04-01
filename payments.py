@@ -25,7 +25,7 @@ pp_config_live = PayPalConfig(API_USERNAME="sbccalerts_api2.gmail.com",
                               API_ENVIRONMENT="PRODUCTION")
 pp_interface_live = PayPalInterface(config=pp_config_live)
 
-pp_interface = pp_interface_sandbox
+pp_interface = pp_interface_live
 
 
 def route(app):
