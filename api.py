@@ -84,6 +84,7 @@ def route(app):
         else:
             logger.info("Honeypot detected spam from in sign-up for {}".format(create_email))
 
+            return redirect(url_for("landing_page"))
 
     @app.route("/api/user/verify-email/<code>")
     @requires_signin
