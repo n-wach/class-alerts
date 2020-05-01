@@ -13,6 +13,9 @@ class UCLA(College):
     name = "University of California Los Angeles"
     icon = "images/ucla.png"
 
+    renewal_period = "quarter"
+    renewal_cost = 3
+
     search_page = BeautifulSoup(urlget("https://sa.ucla.edu/ro/public/soc").text, "html.parser")
 
     term_select = search_page.find("select", id="optSelectTerm").find_all("option")

@@ -15,6 +15,9 @@ class UCSB(College):
     name = "University of California Santa Barbara"
     icon = "images/ucsb.png"
 
+    renewal_period = "quarter"
+    renewal_cost = 3
+
     landing_page_request = urlget("https://my.sa.ucsb.edu/public/curriculum/coursesearch.aspx")
 
     landing_page = BeautifulSoup(landing_page_request.text, "html.parser")

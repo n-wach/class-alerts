@@ -15,6 +15,9 @@ class UCB(College):
     name = "University of California Berkeley"
     icon = "images/ucb.png"
 
+    renewal_period = "semester"
+    renewal_cost = 5
+
     courses_page = BeautifulSoup(urlget("http://guide.berkeley.edu/courses/").text, "html.parser")
     subject_links = courses_page.find(id="atozindex").findChildren("a")
 

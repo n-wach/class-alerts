@@ -13,6 +13,9 @@ class UCSD(College):
     name = "University of California San Diego"
     icon = "images/ucsd.png"
 
+    renewal_period = "quarter"
+    renewal_cost = 3
+
     search_page = BeautifulSoup(urlget("https://act.ucsd.edu/scheduleOfClasses/scheduleOfClassesStudent.htm").text, "html.parser")
 
     term_select = search_page.find("select", id="selectedTerm").findChildren()

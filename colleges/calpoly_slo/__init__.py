@@ -15,6 +15,9 @@ class CalpolySLO(College):
     name = "Cal Poly - San Luis Obispo"
     icon = "images/calpoly.png"
 
+    renewal_period = "quarter"
+    renewal_cost = 3
+
     first_look = urlget("https://pass.calpoly.edu/main.html")
 
     cookies = {"PS_DEVICEFEATURES": "width:1920 height:1080 pixelratio:1 touch:0 geolocation:1 websockets:1 webworkers:1 datepicker:1 dtpicker:1 timepicker:1 dnd:1 sessionstorage:1 localstorage:1 history:1 canvas:1 svg:1 postmessage:1 hc:0 maf:0",

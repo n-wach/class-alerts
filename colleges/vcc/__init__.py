@@ -14,6 +14,9 @@ class VCC(College):
     name = "Ventura College"
     icon = "images/vcc.png"
 
+    renewal_period = "quarter"
+    renewal_cost = 5
+
     search_req = urlget("https://ssb.vcccd.edu/prod/pw_pub_sched.P_Simple_SEARCH")
 
     search_page = BeautifulSoup(search_req.text, "html.parser")

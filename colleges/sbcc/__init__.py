@@ -14,6 +14,9 @@ class SBCC(College):
     name = "Santa Barbara City College"
     icon = "images/sbcc.png"
 
+    renewal_period = "semester"
+    renewal_cost = 5
+
     search_req = urlget("https://banner.sbcc.edu/PROD/pw_pub_sched.p_search")
 
     search_page = BeautifulSoup(search_req.text, "html.parser")
