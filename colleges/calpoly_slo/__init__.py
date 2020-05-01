@@ -11,7 +11,7 @@ from colleges.generic import College, template_environment, ClassUpdateException
 
 
 class CalpolySLO(College):
-    short_name = "CalpolySLO"
+    short_name = "Cal Poly SLO"
     name = "Cal Poly - San Luis Obispo"
     icon = "images/calpoly.png"
 
@@ -138,7 +138,7 @@ class CalpolySLO(College):
                     print(name)
                     self.display_name = "{} - {} {} ({})".format(name, data[1].string, data[0].string, data[2].string)
                     self.status_message = "Open: {} | Open Reserved: {} | Waiting: {}".format(open_seats, open_reserved_seats, waiting)
-                    self.has_availability = open_seats > 0
+                    self.has_availability = open_seats > 0 and waiting == 0
                     return self.has_availability
 
             raise ClassUpdateException("Class number not found in results page")

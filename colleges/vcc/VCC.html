@@ -1,0 +1,4 @@
+{% from "utility/forms.html" import make_select_field, make_input_field %}
+{{ make_select_field("term", "Term", terms) }}
+{{ make_input_field("text", "sub", "Subject (BIO, MATH, ART, etc.)", "[A-Z]+", "Uppercase with no numbers", required=True) }}
+{{ make_input_field("text", "crn", "CRN", "\d{5}", "CRN is a 5 digital number", required=True) }}

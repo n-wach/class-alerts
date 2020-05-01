@@ -137,7 +137,11 @@ class UCSB(College):
             else:
                 raise ClassUpdateException("Failed to find code")
 
-            self.has_availability = self.taken_normal_seats < self.total_normal_seats
+            if self.waitlist_seats_avail == self.total_waitlist_seats:
+                # no waitlist
+                self.has_availability = self.taken_normal_seats < self.total_normal_seats
+            else:
+                self.has_availability = self.waitlist_seats_avail < self.total_waitlist_seats
 
             return self.has_availability
 
