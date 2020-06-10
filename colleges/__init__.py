@@ -18,7 +18,7 @@ colleges = []
 
 for module_name, class_name in college_modules:
     try:
-        module = importlib.import_module(module_name, "colleges")
+        module = importlib.import_module("colleges.{}".format(module_name), "colleges")
         colleges.append(getattr(module, class_name))
     except Exception as e:
         logger.exception("Error loading college: {}".format(module_name))
