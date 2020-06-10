@@ -1,5 +1,4 @@
 {% from "utility/forms.html" import make_select_field, make_input_field %}
 {{ make_select_field("quarter", "Quarter", quarters) }}
-{{ make_select_field("subject", "Subject", subjects) }}
-{{ make_input_field("text", "code", "Enrollment or Section Code", "[0-9]{1,5}(?:\/[A-Z])?",
-                    "Example: <code>00172</code> or <code>03892/B</code>", required=True) }}
+{{ make_input_field("text", "code", "Enrollment or Section Code", "[0-9]{1,5}",
+                    "Example: <code>00172</code>", required=True) }}
