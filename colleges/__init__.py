@@ -1,13 +1,27 @@
-from colleges.sbcc import SBCC
-from colleges.ucb import UCB
-from colleges.vcc import VCC
-#from colleges.calpoly_slo import CalpolySLO
-from colleges.ucsd import UCSD
-from colleges.ucla import UCLA
+import importlib
+import logging
 
 __all__ = ["colleges", "college_names", "college_short_names", "get_user_college"]
+logger = logging.getLogger("app.colleges")
 
-colleges = [SBCC, VCC, UCB, UCSD, UCLA]
+college_modules = [
+    ("sbcc", "SBCC"),
+    ("ucb", "UCB"),
+    ("vcc", "VCC"),
+    ("calpoly_slo", "CalpolySLO"),
+    ("ucsd", "UCSD"),
+    ("ucsb", "UCSB"),
+    ("ucla", "UCLA"),
+]
+
+colleges = []
+
+for module_name, class_name in college_modules:
+    try:
+        module = importlib.import_module(module_name, "colleges")
+        colleges.append(getattr(module, class_name))
+    except Exception as e:
+        logger.exception("Error loading college: {}".format(module_name))
 
 college_names = [college.name for college in colleges]
 college_short_names = [college.short_name for college in colleges]
