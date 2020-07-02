@@ -82,7 +82,7 @@ def route(app):
                 send_verification_email(user)
                 return redirect(url_for("verify_email"))
         else:
-            logger.info("Honeypot detected spam from in sign-up for {}".format(create_email))
+            logger.info("Honeypot detected spam in sign-up from {}".format(create_email))
 
             return redirect(url_for("landing_page"))
 
