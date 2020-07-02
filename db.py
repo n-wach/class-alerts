@@ -298,6 +298,9 @@ class ClassRequest(db.Model):
         logger.debug("Created {}".format(self))
 
     def update(self):
+        if not self.get_requester().is_paid:
+            self.delete()
+            return
         logger.debug("Updating {}".format(self))
         delay_notify = datetime.now() - self.last_notified
         monitor = self.get_monitor()
