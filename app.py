@@ -46,14 +46,12 @@ app = Flask(__name__,
             static_folder='static')
 
 
-logger.info("Adding ProxyFix...")
-app.wsgi_app = ProxyFix(app.wsgi_app)
-
-
 logger.info("Configuring...")
 app.secret_key = os.environ.get("SECRET_KEY")
 if os.environ.get("SERVER_NAME") is not None:
     app.config["SERVER_NAME"] = os.environ.get("SERVER_NAME")
+    # if we have server name, we likely have https
+    app.config["PREFERRED_URL_SCHEME"] = "https"
 
 
 logger.info("Defining Constants...")
