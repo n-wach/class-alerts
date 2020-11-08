@@ -74,6 +74,11 @@ import payments
 payments.route(app)
 
 
+logger.info("Preparing Google OAuth")
+import oauth
+oauth.setup(app)
+
+
 logger.info("Adding CSRF Request Handlers")
 
 
