@@ -10,6 +10,8 @@ from flask_apscheduler import APScheduler
 
 import logging.handlers
 
+from werkzeug.contrib.fixers import ProxyFix
+
 logger = logging.getLogger("app")
 level_str = os.environ.get("LOG_LEVEL")
 levels = {
@@ -42,6 +44,10 @@ logger.info("Setting up...")
 app = Flask(__name__,
             static_url_path='',
             static_folder='static')
+
+
+logger.info("Adding ProxyFix...")
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 
 logger.info("Configuring...")

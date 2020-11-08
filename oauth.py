@@ -13,7 +13,7 @@ def setup(app):
     google_bp = make_google_blueprint(scope=["profile", "email"])
     app.register_blueprint(google_bp, url_prefix="/login")
 
-    @app.route("/api/google_signin", methods=["POST"])
+    @app.route("/api/google_signin", methods=["GET"])
     def google_signin():
         if not google.authorized:
             return redirect(url_for("google.login"))
