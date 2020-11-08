@@ -28,7 +28,7 @@ def setup(app):
             logger.info("{} logged in with Google".format(user))
         else:
             # new account
-            new_user = User("oauth", email, None)
+            new_user = User("oauth", email, os.urandom(32))
             new_user.is_verified = True
             logger.info("New account created from OAuth login: {}".format(user))
             session["uuid"] = new_user.uuid

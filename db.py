@@ -74,7 +74,9 @@ class User(db.Model):
         db.session.commit()
 
     def set_password(self, raw_password, email=True):
-        self.bcrypt_password = bcrypt.hashpw(raw_password.encode(), bcrypt.gensalt()).decode()
+        if isinstance(raw_password, str):
+            raw_password = raw_password.encode()
+        self.bcrypt_password = bcrypt.hashpw(raw_password, bcrypt.gensalt()).decode()
         db.session.commit()
         if email:
             send_password_change_email(self)

@@ -263,7 +263,10 @@ def route(app):
     def api_send_forgot_password():
         email = request.form.get("email").lower()
         user = User.query.filter_by(email=email).first()
-        if user:
+        if user and user.parent_user == "oauth":
+            logger.info("Someone requested password reset for {}, which is an OAuth account".format(user))
+            sleep(random.random() + 0.2)
+        elif user:
             requests = PasswordResetRequest.query.filter_by(user_uuid=user.uuid).order_by(PasswordResetRequest.created_at).all()
             recent = None if len(requests) == 0 else requests[-1]
             if recent and not recent.is_expired():
