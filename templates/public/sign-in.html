@@ -18,12 +18,16 @@
         <a class="mdl-button mdl-js-button mdl-cell mdl-cell--5-col" href="{{ url_for('signup') }}">Sign Up</a>
         <div class="mdl-layout-spacer"></div>
       </div>
-      <hr>
+      <div class="mdl-grid">
+        <div class="mdl-layout-spacer"></div>
+        <span>or</span>
+        <div class="mdl-layout-spacer"></div>
+      </div>
       <div class="mdl-grid">
         <div class="mdl-layout-spacer"></div>
         <a class="mdl-cell mdl-cell--10-col mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--grey-50 mdl-color-text--grey-700"
           href="{{ url_for("google_signin") }}">
-          <img src="{{ url_for("static", filename="images/google_signin_logo.png") }}" alt="Google Logo" class="mdl-button--icon"> Sign in with Google
+          <img src="{{ url_for("static", filename="images/google_signin_logo.png") }}" alt="Google Logo" class="button-icon"> Sign in with Google
         </a>
         <div class="mdl-layout-spacer"></div>
       </div>

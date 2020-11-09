@@ -22,16 +22,14 @@
       {{ make_button("Create Account") }}
       <div class="mdl-grid">
         <div class="mdl-layout-spacer"></div>
-        <a class="mdl-button mdl-js-button mdl-cell mdl-cell--10-col" href="{{ url_for('signin') }}">Sign In</a>
+        <span>or</span>
         <div class="mdl-layout-spacer"></div>
       </div>
-
-      <hr>
       <div class="mdl-grid">
         <div class="mdl-layout-spacer"></div>
         <a class="mdl-cell mdl-cell--10-col mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--grey-50 mdl-color-text--grey-700"
           href="{{ url_for("google_signin") }}">
-          <img src="{{ url_for("static", filename="images/google_signin_logo.png") }}" alt="Google Logo" class="mdl-button--icon"> Sign in with Google
+          <img src="{{ url_for("static", filename="images/google_signin_logo.png") }}" alt="Google Logo" class="button-icon"> Or create an account using Google
         </a>
         <div class="mdl-layout-spacer"></div>
       </div>

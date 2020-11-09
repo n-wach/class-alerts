@@ -313,3 +313,10 @@ footer a {
 footer a:hover {
     text-decoration: underline;
 }
+
+.button-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    margin-left: 8px;
+}
