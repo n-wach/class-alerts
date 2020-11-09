@@ -11,11 +11,6 @@
       Please include your email so we can respond to your message.
       <div data-skip-on-tab="true" class="ja">
         {{ make_input_field("phone", "phone", "Your Phone", required=True) }}
-        <script>
-          document.getElementsByTagName("form")[0].onsubmit = function() {
-              document.getElementById("phone").value = "18004206969";
-          }
-        </script>
       </div>
       {{ make_input_field("email", "email", "Your Email", required=True, value=user.email if user) }}
       {% if college_request %}

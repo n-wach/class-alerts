@@ -9,11 +9,6 @@
     {% call make_form(url_for('api_signup'), error) %}
       <div data-skip-on-tab="true" class="ja">
         {{ make_input_field("phone", "phone", "Your Phone", required=True) }}
-        <script>
-          document.getElementsByTagName("form")[0].onsubmit = function() {
-              document.getElementById("phone").value = "18004206969";
-          }
-        </script>
       </div>
       {{ make_input_field("email", "email", "Email", required=True) }}
       {{ make_input_field("password", "password", "Password", ".{6,}", "Password must be at least 6 characters", required=False) }}

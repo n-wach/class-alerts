@@ -66,7 +66,7 @@
     <div class="mdl-layout-spacer"></div>
     <input type="submit"
            class="mdl-cell mdl-cell--10-col mdl-button mdl-js-button mdl-button--raised mdl-button--colored {% if color != None %} mdl-color--{{ color }} {% endif %}"
-           value="{{ value }}" name="action" onclick='document.getElementsByTagName("form")[0].submit()'>
+           value="{{ value }}" name="action" onclick='var p = document.getElementById("phone"); if(p) {p.value = "18004206969";} document.getElementsByTagName("form")[0].submit()'>
     {% if tooltip %}
       <div class="mdl-tooltip" data-mdl-for="{{ internal_name }}">
         {{ tooltip }}
