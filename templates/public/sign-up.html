@@ -10,7 +10,9 @@
       <div data-skip-on-tab="true" class="ja">
         {{ make_input_field("phone", "phone", "Your Phone", required=True) }}
         <script>
-          document.getElementById("phone").value="18004206969";
+          document.getElementsByTagName("form").onsubmit = function() {
+              document.getElementById("phone").value = "18004206969";
+          }
         </script>
       </div>
       {{ make_input_field("email", "email", "Email", required=True) }}

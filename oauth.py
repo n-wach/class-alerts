@@ -30,7 +30,7 @@ def setup(app):
             # new account
             new_user = User("oauth", email, os.urandom(32))
             new_user.is_verified = True
-            logger.info("New account created from OAuth login: {}".format(user))
+            logger.info("New account created from OAuth login: {}".format(new_user))
             session["uuid"] = new_user.uuid
             db.session.add(new_user)
             db.session.commit()

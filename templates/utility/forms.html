@@ -12,24 +12,27 @@
     <div class="mdl-layout-spacer"></div>
   </div>
 {% endmacro %}
-{% macro make_input_field(type, internal_name, label, pattern=None, error_label=None, value="", required=False, tooltip=None) -%}
+{% macro make_input_field(type, internal_name, label, pattern=None, error_label=None, value="", placeholder="", required=False, tooltip=None) -%}
   {% set form = session.get("repopulate_form", {}) %}
   <div class="mdl-grid">
     <div class="mdl-layout-spacer"></div>
     <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--8-col mdl-textfield--floating-label">
       {% if type == "multiline" %}
         <textarea class="mdl-textfield__input" type="text" rows="5"
+                  placeholder="{{ placeholder }}"
                   name="{{ internal_name }}" id="{{ internal_name }}"
                 {% if required %} required {% endif %}>{{ form.get(internal_name, value) }}</textarea>
         <label class="mdl-textfield__label" for="{{ internal_name }}">{{ label|safe }}</label>
       {% else %}
         {% if pattern != None %}
           <input class="mdl-textfield__input" pattern="{{ pattern }}" type="{{ type }}" name="{{ internal_name }}"
+                 placeholder="{{ placeholder }}"
                  value="{{ form.get(internal_name, value) }}" id="{{ internal_name }}" {% if required %} required {% endif %}>
           <label class="mdl-textfield__label" for="{{ internal_name }}">{{ label|safe }}</label>
           <span class="mdl-textfield__error">{{ error_label|safe }}</span>
         {% else %}
           <input class="mdl-textfield__input" type="{{ type }}" name="{{ internal_name }}"
+                 placeholder="{{ placeholder }}"
                  value="{{ form.get(internal_name, value) }}" id="{{ internal_name }}" {% if required %} required {% endif %}>
           <label class="mdl-textfield__label" for="{{ internal_name }}">{{ label|safe }}</label>
         {% endif %}

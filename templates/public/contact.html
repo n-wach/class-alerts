@@ -12,14 +12,16 @@
       <div data-skip-on-tab="true" class="ja">
         {{ make_input_field("phone", "phone", "Your Phone", required=True) }}
         <script>
-          document.getElementById("phone").value="18004206969";
+          document.getElementsByTagName("form").onsubmit = function() {
+              document.getElementById("phone").value = "18004206969";
+          }
         </script>
       </div>
       {{ make_input_field("email", "email", "Your Email", required=True, value=user.email if user) }}
       {% if college_request %}
         {{ make_input_field("text", "subject", "Subject", value="College Add Request") }}
         {{ make_input_field("multiline", "message", "Message", required=True,
-           value="Please provide information on your college, including its name and website, and we'll add it as soon as possible.") }}
+           placeholder="Please provide information on your college, including its name and website, and we'll add it as soon as possible.") }}
       {% else %}
         {{ make_input_field("text", "subject", "Subject") }}
         {{ make_input_field("multiline", "message", "Message", required=True) }}
