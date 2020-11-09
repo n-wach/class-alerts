@@ -21,7 +21,7 @@
         {{ make_input_field("text", "subject", "Subject") }}
         {{ make_input_field("multiline", "message", "Message", required=True) }}
       {% endif %}
-      {{ make_button("Send Message") }}
+      {{ make_button("Send Message", honeypot=True) }}
     {% endcall %}
   {% endcall %}
 {% endblock %}
