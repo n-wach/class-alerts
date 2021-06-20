@@ -11,7 +11,8 @@ decorator==4.1.2
 Flask==0.12.2
 Flask-APScheduler==1.7.1
 flask-dance==3.0.0
-Flask-SQLAlchemy==2.3.2
+Flask-Limiter==1.4
+Flask-SQLAlchemy==2.5.1
 gunicorn==19.7.1
 idna==2.6
 ipython==6.2.1
@@ -23,7 +24,6 @@ MarkupSafe==1.0
 parso==0.1.0
 pexpect==4.3.0
 pickleshare==0.7.4
-pip==9.0.1
 prompt-toolkit==1.0.15
 ptyprocess==0.5.2
 pycparser==2.18
@@ -36,7 +36,7 @@ requests==2.18.4
 setuptools==36.7.2
 simplegeneric==0.8.1
 six==1.11.0
-SQLAlchemy==1.1.15
+SQLAlchemy==1.4.18
 traitlets==4.3.2
 twilio==6.8.4
 tzlocal==1.4

@@ -60,8 +60,6 @@
       {% if user.role <= 100 %}
         {{ tile_icon("View Accounts", "deep-orange", "view_list", "visit('" + url_for('admin_users_view') + "')", False) }}
         {{ tile_icon("View Codes", "deep-orange", "view_list", "visit('" + url_for('admin_codes_view') + "')", False) }}
-      {% endif %}
-      {% if user.role <= 10 %}
         {{ tile_icon("Message All", "deep-orange", "edit", "visit('" + url_for('admin_message') + "')", False) }}
       {% endif %}
     </div>

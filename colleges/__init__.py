@@ -12,6 +12,7 @@ college_modules = [
     ("ucsd", "UCSD"),
     ("ucsb", "UCSB"),
     ("ucla", "UCLA"),
+    ("ucmerced", "UCMerced")
 ]
 
 colleges = []
