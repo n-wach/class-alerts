@@ -17,7 +17,8 @@ email_sender = os.environ.get("EMAIL_SENDER", "Class Alerts <info@m.classalerts.
 email_api_key = os.environ.get("EMAIL_API_KEY")
 email_url = "https://api.mailgun.net/v3/m.classalerts.org/messages"
 
-client = Client(twilio_sid, twilio_auth)
+if use_twilio:
+    client = Client(twilio_sid, twilio_auth)
 
 
 TEMPLATE_VERIFICATION = None

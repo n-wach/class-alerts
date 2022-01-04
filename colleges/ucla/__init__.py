@@ -1,7 +1,7 @@
 import re
 
 from tor import urlget, urlpost
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, TemplateString
 
 from db import ClassMonitor, db
 from decorators import errors
@@ -106,12 +106,16 @@ class UCLA(College):
             response = urlpost(self.info_url, tor=True)
             info_page = BeautifulSoup(response.text, "html.parser")
 
-            class_name = list(info_page.find("div", id="subject_class").p.stripped_strings)[-1]
-            section = list(info_page.find("div", id="class_id_textbook").p.stripped_strings)[0].split(":")[-1].strip().upper()
+            name_contents = info_page.find("div", id="subject_class").p.contents
+            raw_name = list(filter(lambda f: isinstance(f, TemplateString), name_contents))[-1]
+            class_name = raw_name.string.strip()
+            section_contents = info_page.find("div", id="class_id_textbook").p.contents
+            raw_section = list(filter(lambda f: isinstance(f, TemplateString), section_contents))[0]
+            section = raw_section.string.split(":")[-1].strip().upper()
             self.display_name = "{} - {} ({})".format(" ".join(class_name.replace("\t", " ").split()), section, self.class_id)
 
-            enrollment_info = info_page.find("div", id="enrl_mtng_info").find_all("div", class_="data-row")
-            status, waitlist_status, days, time, location, units, instructor = enrollment_info[0].findChildren(recursive=False)
+            enrollment_info = info_page.find("div", id="enrl_mtng_info").find_all("tr", class_="enrl_mtng_info")
+            status, waitlist_status, days, time, location, units, instructor = enrollment_info[-1].findChildren(recursive=False)
             self.status_message = status.string + " | " + waitlist_status.string
 
             self.has_availability = "Open" in self.status_message
